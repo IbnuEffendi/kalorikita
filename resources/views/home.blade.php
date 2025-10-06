@@ -22,6 +22,7 @@
         <x-hero></x-hero>
         <x-display-lab></x-display-lab>
         <x-display-membership></x-display-membership>
+        <x-review></x-review>
     </main>
     <x-footer></x-footer>
 
