@@ -21,7 +21,7 @@
           </svg>
         </a>
         <a href="#" class="inline-flex items-center justify-center rounded-full bg-yellow-400 px-6 py-3 text-black font-semibold text-sm shadow-md hover:bg-yellow-200 transition">
-          Lab Kalori
+          Lab Kalori g
         </a>
       </div>
     </div>
