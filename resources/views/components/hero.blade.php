@@ -4,7 +4,7 @@
     <!-- Left Content -->
     <div class="max-w-xl space-y-6">
       <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight text-gray-900">
-        Teman Setia Diet,<br />
+        Teman Setia MAKAN,<br />
         Bulking, Dan Hidup<br />
         Sehat.
       </h1>
