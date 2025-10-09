@@ -4,7 +4,7 @@
     <!-- Left Content -->
     <div class="max-w-xl space-y-6">
       <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight text-gray-900">
-        Teman Setia MAKAN,<br />
+        Teman Setia Diet,<br />
         Bulking, Dan Hidup<br />
         Sehat.
       </h1>
@@ -21,7 +21,7 @@
           </svg>
         </a>
         <a href="#" class="inline-flex items-center justify-center rounded-full bg-yellow-400 px-6 py-3 text-black font-semibold text-sm shadow-md hover:bg-yellow-200 transition">
-          Lab Kalori g
+          Lab Kalori 
         </a>
       </div>
     </div>
