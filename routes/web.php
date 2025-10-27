@@ -7,9 +7,9 @@ Route::get('/', function () {
 });
 
 Route::get('/kalori-lab', function () {
-    return view('');
+    return view('labkalori');
 });
 
 Route::get('/menu', function () {
-    return view('');
+    return view('components.food-menu');
 });

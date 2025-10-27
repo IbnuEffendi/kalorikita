@@ -21,6 +21,7 @@
     <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <x-hero></x-hero>
         <x-display-lab></x-display-lab>
+        <x-weekly-menu></x-weekly-menu>
         <x-display-membership></x-display-membership>
         <x-review></x-review>
     </main>

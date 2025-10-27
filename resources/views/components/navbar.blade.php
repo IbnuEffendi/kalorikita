@@ -8,17 +8,17 @@
 
             <!-- Center: Desktop menu -->
             <ul class="hidden md:flex items-center gap-7 text-[15px] font-medium">
-                <li><a href="#"
+                <li><a href="{{ url('/') }}"
                         class="hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/40 rounded px-1 py-1">Home</a>
                 </li>
-                <li><a href="#"
+                <li><a href="{{ url('/menu') }}"
                         class="hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/40 rounded px-1 py-1">Menu</a>
                 </li>
                 <li><a href="#"
                         class="hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/40 rounded px-1 py-1">Paket</a>
                 </li>
                 <li>
-                    <a href="#"
+                    <a href="{{ url('/kalori-lab') }}"
                         class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-1 text-sm font-semibold hover:bg-yellow-300 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500/50">
                         Lab Kalori
                     </a>
