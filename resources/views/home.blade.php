@@ -12,6 +12,11 @@
             @apply transition ease-out duration-200;
         }
     </style>
+        <!-- Swiper CSS -->
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
 </head>
 
 <body class="min-h-screen bg-white text-slate-900">
@@ -21,12 +26,13 @@
     <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <x-hero></x-hero>
         <x-display-lab></x-display-lab>
-        <x-weekly-menu></x-weekly-menu>
+        <x-weekly-menu :menu-mingguan="$menuMingguan"/>
         <x-display-membership></x-display-membership>
         <x-review></x-review>
     </main>
     <x-footer></x-footer>
-
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         const btn = document.getElementById('menuBtn');
         const menu = document.getElementById('mobileMenu');
@@ -40,7 +46,36 @@
                 '<path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>';
             btn.setAttribute('aria-expanded', String(isOpen));
         });
+        
     </script>
+    <script>
+  const menuSwiper = new Swiper('.menuSwiper', {
+    loop: true,
+    slidesPerView: 1,
+    spaceBetween: 16,
+    // responsive
+    breakpoints: {
+      640: {
+        slidesPerView: 2,
+      },
+      768: {
+        slidesPerView: 3,
+      },
+      1024: {
+        slidesPerView: 5,
+      },
+    },
+    autoplay: {
+      delay: 3500,
+      disableOnInteraction: false,
+    },
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+  });
+</script>
+
 </body>
 
 </html>
