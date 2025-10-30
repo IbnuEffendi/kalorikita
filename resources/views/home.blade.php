@@ -12,6 +12,7 @@
             @apply transition ease-out duration-200;
         }
     </style>
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
 </head>
 
 <body class="min-h-screen bg-white text-slate-900">

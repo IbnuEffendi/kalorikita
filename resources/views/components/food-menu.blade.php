@@ -25,14 +25,14 @@
 
       <div class="max-w-6xl mx-auto px-6 py-16">
         <!-- Judul -->
-        <div class="text-center mb-12">
+        <div class="text-center mb-20">
           <h2 class="text-3xl font-bold text-[#155C2E] mb-2">Menu Kami</h2>
           <div class="w-20 h-[3px] bg-[#FBBF24] mx-auto rounded"></div>
         </div>
 
         <!-- Grid Menu -->
         <div
-          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 justify-items-center"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 justify-items-center mt-20"
         >
           <!-- 1. Salad -->
           <div
@@ -40,9 +40,9 @@
           >
             <!-- GANTI GAMBAR DI SINI -->
             <img
-              src="/asset/salad1.png"
+              src="/asset/food1.png"
               alt="Salad"
-              class="w-36 h-36 object-cover mx-auto -mt-12 rounded-full shadow-lg border-4 border-white"
+              class="w-27 h-27 object-cover mx-auto -mt-20"
             />
             <h3 class="text-lg font-semibold text-[#155C2E] mt-4">Salad</h3>
             <p class="text-sm text-gray-600 mt-1">
@@ -82,9 +82,9 @@
           >
             <!-- GANTI GAMBAR DI SINI -->
             <img
-              src="/asset/smoothies1.png"
+              src="/asset/food2.png"
               alt="Smoothies"
-              class="w-36 h-36 object-cover mx-auto -mt-12 rounded-full shadow-lg border-4 border-white"
+              class="w-27 h-27 object-cover mx-auto -mt-20"
             />
             <h3 class="text-lg font-semibold text-[#155C2E] mt-4">Smoothies</h3>
             <p class="text-sm text-gray-600 mt-1">
@@ -124,9 +124,9 @@
           >
             <!-- GANTI GAMBAR DI SINI -->
             <img
-              src="/asset/salad2.png"
+              src="/asset/food3.png"
               alt="Salad"
-              class="w-36 h-36 object-cover mx-auto -mt-12 rounded-full shadow-lg border-4 border-white"
+              class="w-27 h-27 object-cover mx-auto -mt-20"
             />
             <h3 class="text-lg font-semibold text-[#155C2E] mt-4">Salad</h3>
             <p class="text-sm text-gray-600 mt-1">
@@ -166,9 +166,9 @@
           >
             <!-- GANTI GAMBAR DI SINI -->
             <img
-              src="/asset/salad-buah.png"
+              src="/asset/food4.png"
               alt="Salad Buah"
-              class="w-36 h-36 object-cover mx-auto -mt-12 rounded-full shadow-lg border-4 border-white"
+              class="w-27 h-27 object-cover mx-auto -mt-20"
             />
             <h3 class="text-lg font-semibold text-[#155C2E] mt-4">Salad Buah</h3>
             <p class="text-sm text-gray-600 mt-1">
@@ -208,9 +208,9 @@
           >
             <!-- GANTI GAMBAR DI SINI -->
             <img
-              src="/asset/salad3.png"
+              src="/asset/food5.png"
               alt="Salad"
-              class="w-36 h-36 object-cover mx-auto -mt-12 rounded-full shadow-lg border-4 border-white"
+              class="w-25 h-25 object-cover mx-auto -mt-20"
             />
             <h3 class="text-lg font-semibold text-[#155C2E] mt-4">Salad</h3>
             <p class="text-sm text-gray-600 mt-1">
@@ -251,9 +251,9 @@
           >
             <!-- GANTI GAMBAR DI SINI -->
             <img
-              src="/asset/smoothies2.png"
+              src="/asset/food6.png"
               alt="Smoothies"
-              class="w-36 h-36 object-cover mx-auto -mt-12 rounded-full shadow-lg border-4 border-white"
+              class="w-27 h-27 object-cover mx-auto -mt-20"
             />
             <h3 class="text-lg font-semibold text-[#155C2E] mt-4">Smoothies</h3>
             <p class="text-sm text-gray-600 mt-1">
@@ -289,36 +289,29 @@
           </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="flex justify-center items-center space-x-3 mt-10">
-          <button
-            class="bg-[#155C2E] text-white px-3 py-1 rounded-full hover:scale-105 transition-transform"
-          >
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <button
-            class="bg-[#155C2E] text-white w-8 h-8 rounded-lg font-semibold"
-          >
-            1
-          </button>
-          <button
-            class="border border-[#155C2E] w-8 h-8 rounded-lg font-semibold text-[#155C2E]"
-          >
-            2
-          </button>
-          <button
-            class="border border-[#155C2E] w-8 h-8 rounded-lg font-semibold text-[#155C2E]"
-          >
-            3
-          </button>
-          <button
-            class="bg-[#155C2E] text-white px-3 py-1 rounded-full hover:scale-105 transition-transform"
-          >
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
+      <!-- ===================== PAGINATION ===================== -->
+      <div class="mt-12 flex items-center justify-center gap-4 relative z-10">
+        <button
+          class="w-10 h-10 flex items-center justify-center bg-[#2F6F3B] text-white rounded-md shadow-md hover:bg-[#24582E] transition">
+          ◀
+        </button>
+        <button class="w-12 h-12 flex items-center justify-center bg-[#2F6F3B] text-white rounded-xl font-extrabold shadow-md">
+          1
+        </button>
+        <button class="w-12 h-12 flex items-center justify-center bg-white ring-1 ring-gray-200 rounded-xl hover:bg-gray-100 transition">
+          2
+        </button>
+        <button class="w-12 h-12 flex items-center justify-center bg-white ring-1 ring-gray-200 rounded-xl hover:bg-gray-100 transition">
+          3
+        </button>
+        <button
+          class="w-10 h-10 flex items-center justify-center bg-[#2F6F3B] text-white rounded-md shadow-md hover:bg-[#24582E] transition">
+          ▶
+        </button>
       </div>
     </section>
+  </body>
+</html>
 
     <!-- FOOTER -->
     <x-footer></x-footer>
