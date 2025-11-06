@@ -18,9 +18,12 @@
 
     <!-- SECTION: MENU KAMI -->
     <section
-      class="relative bg-[#F7F7F7] min-h-screen bg-cover bg-no-repeat"
-      style="background-image: url('/asset/menu-pattern.png');"
+      class="relative bg-white"
     >
+    <div class="background flex justify-between absolute w-full">
+      <img class="" src="/asset/pattern1.png" alt="background">
+      <img class="" src="/asset/pattern1.png" alt="background">
+    </div>
       <!-- Ganti '/asset/menu-pattern.png' dengan file pattern background kamu -->
 
       <div class="max-w-6xl mx-auto px-6 py-16">

@@ -12,9 +12,9 @@
                     Dengarkan pengalaman mereka yang sudah merasakan <span class="font-semibold">manfaat nyata dari pola
                         makan seimbang</span>.
                 </p>
-
             </div>
         </div>
+        
         <div class="container-button flex justify-end mb-5 px-5">
             <svg class="mr-5" width="30" height="30" viewBox="0 0 36 39" fill="none"
                 xmlns="http://www.w3.org/2000/svg">

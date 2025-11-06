@@ -43,7 +43,6 @@
                                                     {{ $menu->tipe_makanan === 'vegan' ? 'Vegan' : 'Non Vegan' }}
                                                 </span>
                                             </div>
-                                            <button class="text-red-500 text-xl">❤️</button>
                                         </div>
                                     </div>
                                 </div>
