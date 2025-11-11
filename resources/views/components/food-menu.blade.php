@@ -18,15 +18,15 @@
 
     <!-- SECTION: MENU KAMI -->
     <section
-      class="relative bg-white"
+      class="relative bg-[#DAEFA2] overflow-hidden"
     >
-    <div class="background flex justify-between absolute w-full">
+    <div class="background flex justify-between absolute w-full pointer-events-none">
       <img class="" src="/asset/pattern1.png" alt="background">
-      <img class="" src="/asset/pattern1.png" alt="background">
+      <img class="" src="/asset/pattern1flip.png" alt="background">
     </div>
       <!-- Ganti '/asset/menu-pattern.png' dengan file pattern background kamu -->
 
-      <div class="max-w-6xl mx-auto px-6 py-16">
+      <div class="max-w-6xl mx-auto px-6 py-16 relative z-10">
         <!-- Judul -->
         <div class="text-center mb-20">
           <h2 class="text-3xl font-bold text-[#155C2E] mb-2">Menu Kami</h2>
