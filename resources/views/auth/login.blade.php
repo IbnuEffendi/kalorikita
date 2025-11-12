@@ -9,16 +9,10 @@
 
   <body class="bg-green-900 flex justify-center items-center min-h-screen font-sans">
     <div class="bg-white rounded-2xl shadow-lg flex overflow-hidden w-[900px] max-w-full">
-      <!-- KIRI (SAMA PERSIS DENGAN REGISTER) -->
       <div class="w-1/2 bg-green-800 text-white flex flex-col justify-center px-10 relative">
-        <!-- Badge -->
         <div class="absolute top-6 left-6 bg-green-700 text-white text-sm px-3 py-1 rounded-full">
           🌱 Platform Gaya Hidup Sehat
         </div>
-
-        <!-- PATTERN BACKGROUND (optional) -->
-        <!-- TODO: kalau pakai gambar pattern, taruh style inline di div KIRI:
-             style="background-image:url('PATH/ke/pattern.png'); background-repeat:no-repeat; background-position:bottom left; background-size:contain;" -->
 
         <div class="mt-16">
           <h1 class="text-4xl font-bold leading-tight">
@@ -36,13 +30,8 @@
             <li class="flex items-start gap-2">✅ <span>Progress Harian & Mingguan Yang Jelas</span></li>
           </ul>
         </div>
-
-        <!-- DOODLE BAWAH (optional) -->
-        <!-- TODO: kalau pakai doodle gambar, tambahkan:
-             <img src="PATH/ke/doodle.png" alt="food doodle" class="absolute bottom-4 left-4 w-40 opacity-70" /> -->
       </div>
 
-      <!-- KANAN (FORM MASUK) -->
       <div class="w-1/2 bg-white p-10 flex flex-col justify-center">
         <h2 class="text-2xl font-semibold mb-6">Masuk</h2>
 
@@ -67,32 +56,66 @@
             />
           </div>
 
-          <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-3 rounded-xl transition">
+          <button
+            type="submit"
+            id="tombol-masuk" 
+            class="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-3 rounded-xl transition"
+          >
             Masuk
           </button>
 
           <p class="text-left text-sm text-gray-800 font-semibold">Lupa Kata Sandi?</p>
 
           <div class="flex items-center my-4">
-            <hr class="flex-grow border-gray-200" />
+            <hr class="grow border-gray-200" />
             <span class="px-2 text-sm text-gray-500">atau</span>
-            <hr class="flex-grow border-gray-200" />
+            <hr class="grow border-gray-200" />
           </div>
 
           <button
             type="button"
+            id="tombol-google"
             class="w-full border border-gray-300 rounded-xl py-3 flex items-center justify-center gap-3 text-gray-800 hover:bg-gray-50"
           >
-            <!-- TODO: ganti dengan logo Google -->
-            <!-- <img src="PATH/ke/google-logo.svg" alt="Google" class="w-5 h-5" /> -->
             <span class="font-semibold">Masuk dengan Google</span>
           </button>
 
           <p class="text-center text-sm mt-4 text-gray-600">
-            Belum punya akun? <a href="register.html" class="text-black font-medium">Daftar</a>
+            Belum punya akun? <a href="/register" class="text-black font-medium">Daftar</a>
           </p>
         </form>
       </div>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        
+        // Ini adalah fungsi 'pura-pura login'
+        const simulasiLogin = (event) => {
+          // 1. Mencegah form kirim data (karena kita cuma pura-pura)
+          event.preventDefault(); 
+          
+          // 2. Buat "Tanda Pengenal" di browser
+          localStorage.setItem('isLoggedIn', 'true');
+
+          // 3. Arahkan user ke Halaman Home
+          // (Ganti '/' dengan halaman home kamu jika beda, misal 'index.html')
+          window.location.href = '/'; 
+        };
+
+        // Pasang fungsi tadi ke Tombol Masuk
+        const tombolMasuk = document.getElementById('tombol-masuk');
+        if (tombolMasuk) {
+          tombolMasuk.addEventListener('click', simulasiLogin);
+        }
+
+        // Pasang fungsi tadi ke Tombol Google
+        const tombolGoogle = document.getElementById('tombol-google');
+        if (tombolGoogle) {
+          tombolGoogle.addEventListener('click', simulasiLogin);
+        }
+
+      });
+    </script>
   </body>
 </html>

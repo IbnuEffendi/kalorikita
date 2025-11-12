@@ -8,22 +8,13 @@
   </head>
   <body class="bg-green-900 flex justify-center items-center min-h-screen font-sans">
     <div class="bg-white rounded-2xl shadow-lg flex overflow-hidden w-[900px] max-w-full">
-      <!-- KIRI -->
       <div
         class="w-1/2 bg-green-800 text-white flex flex-col justify-center px-10 relative"
       >
-        <!-- Pattern background -->
-        <!-- TODO: Tambahkan background image di sini -->
-        <!-- Contoh:
-        style="background-image: url('pattern.png'); background-repeat: no-repeat; background-position: bottom left;"
-        -->
-
-        <!-- Tag kecil -->
         <div class="absolute top-6 left-6 bg-green-700 text-white text-sm px-3 py-1 rounded-full">
           🌱 Platform Gaya Hidup Sehat
         </div>
 
-        <!-- Konten teks utama -->
         <div class="mt-16">
           <h1 class="text-4xl font-bold leading-tight">
             Lacak Kalori & <br />Atur Pola Makanmu
@@ -46,14 +37,8 @@
             </li>
           </ul>
         </div>
-
-        <!-- TODO: Tambahkan pattern image ilustrasi makanan di bagian kiri bawah -->
-        <!-- Contoh:
-        <img src="pattern-food.png" alt="food pattern" class="absolute bottom-4 left-4 w-40 opacity-70" />
-        -->
       </div>
 
-      <!-- KANAN -->
       <div class="w-1/2 bg-white p-10 flex flex-col justify-center">
         <h2 class="text-2xl font-semibold mb-6">Buat Akun</h2>
 
@@ -112,6 +97,7 @@
 
           <button
             type="submit"
+            id="tombol-daftar"
             class="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-2 rounded-md transition"
           >
             Daftar
@@ -119,24 +105,54 @@
         </form>
 
         <div class="flex items-center my-6">
-          <hr class="flex-grow border-gray-300" />
+          <hr class="grow border-gray-300" />
           <span class="px-2 text-sm text-gray-500">atau</span>
-          <hr class="flex-grow border-gray-300" />
+          <hr class="grow border-gray-300" />
         </div>
 
         <button
+          id="tombol-google"
           class="w-full border border-gray-300 rounded-md py-2 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50"
         >
-          <!-- TODO: Ganti dengan logo Google -->
-          <!-- Contoh: <img src="google-logo.png" alt="Google" class="w-5 h-5" /> -->
           <span class="font-medium">Daftar dengan Google</span>
         </button>
 
         <p class="text-center text-sm mt-6 text-gray-600">
           Sudah punya akun?
-          <a href="#" class="text-black font-medium">Masuk</a>
+          <a href="/login" class="text-black font-medium">Masuk</a>
         </p>
       </div>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        
+        // Ini adalah fungsi 'pura-pura daftar & login'
+        const simulasiDaftar = (event) => {
+          // 1. Mencegah form kirim data (karena kita cuma pura-pura)
+          event.preventDefault(); 
+          
+          // 2. Buat "Tanda Pengenal" di browser
+          localStorage.setItem('isLoggedIn', 'true');
+
+          // 3. Arahkan user ke Halaman Home
+          // (Ganti '/' dengan halaman home kamu jika beda, misal 'index.html')
+          window.location.href = '/'; 
+        };
+
+        // Pasang fungsi tadi ke Tombol Daftar
+        const tombolDaftar = document.getElementById('tombol-daftar');
+        if (tombolDaftar) {
+          tombolDaftar.addEventListener('click', simulasiDaftar);
+        }
+
+        // Pasang fungsi tadi ke Tombol Google
+        const tombolGoogle = document.getElementById('tombol-google');
+        if (tombolGoogle) {
+          tombolGoogle.addEventListener('click', simulasiDaftar);
+        }
+
+      });
+    </script>
   </body>
 </html>
