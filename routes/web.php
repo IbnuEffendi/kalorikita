@@ -22,6 +22,18 @@ Route::get('/menu', function () {
     return view('components.food-menu');
 });
 
+Route::get('/profil', function () {
+    return view('profil.dashboard');
+})->name('profil.dashboard');
+
+Route::get('/myorder', function () {
+    return view('profil.myorder');
+})->name('profil.myorder');
+
+Route::get('/logout', function () {
+    return view('profil.logout-modal');
+})->name('profil.logout-modal');
+
 // Halaman daftar paket
 Route::view('/paket', 'paket.list')->name('paket.list');
 
