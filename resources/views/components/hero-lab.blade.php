@@ -13,24 +13,22 @@
 
     /* Background pattern full */
     .full-bg {
-      background-image: url('/asset/pattern.png'); /* Ganti dengan path gambar kamu */
-      background-repeat: repeat;
-      background-size: cover;
-      background-position: top center;
-      opacity: 1;
+      background-image: url('/asset/pattern1.png'), url('/asset/pattern1flip.png'); /* dua gambar pattern */
+      
+      /* --- PERBAIKAN 1: BACKGROUND --- */
+      background-repeat: no-repeat, no-repeat; /* Jangan diulang */
+      background-size: 275px auto, 275px auto;   /* BUAT LEBARNYA 100% & TINGGI OTOMATIS */
+      background-position: 0% 0%, 100% 0%; /* Posisikan di atas */
     }
   </style>
 </head>
 
 <body class="bg-white text-slate-900">
 
-  <!-- HERO SECTION LAB KALORI -->
   <section class="relative min-h-screen flex items-center overflow-hidden full-bg">
 
-    <!-- Konten -->
-    <div class="relative z-10 container mx-auto px-4 md:px-10 grid md:grid-cols-2 gap-2 md:gap-4 items-center -mt-10 md:-mt-20">
+    <div class="relative z-10 container mx-auto px-4 md:px-10 grid md:grid-cols-2 gap-2 md:gap-4 items-center -mt-24 md:-mt-32">
     
-      <!-- Bagian Teks -->
       <div class="text-left space-y-4 md:ml-20 lg:ml-24">
         <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
           Lab Kalori
@@ -45,14 +43,12 @@
         </a>
       </div>
 
-      <!-- Bagian Gambar -->
       <div class="flex justify-center md:justify-start">
-        <img src="/asset/lab-ilu2.png" 
-             alt="Ilustrasi Lab Kalori" 
-             class="w-[300px] sm:w-[380px] md:w-[480px] lg:w-[520px] drop-shadow-md md:-ml-10 lg:-ml-16">
+        <img src="/asset/lab-ilu2.png" alt="Ilustrasi Lab Kalori" 
+          class="w-[300px] sm:w-[380px] md:w-[480px] lg:w-[520px] drop-shadow-md md:-ml-10 lg:-ml-16">
       </div>
 
-  </div>
-</section>
+    </div>
+  </section>
 </body>
 </html>
