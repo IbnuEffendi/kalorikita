@@ -48,11 +48,11 @@
         <span class="text-sm text-red-600 font-medium block mb-3 text-center">*Lengkapi Data Diri Anda</span>
         <div class="flex flex-col items-center space-y-4">
           <input type="text" placeholder="Usia"
-            class="w-80 bg-white rounded-md px-4 py-2 text-center text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500">
+            class="w-80 bg-white rounded-md px-4 py-2 text-center text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-700">
           <input type="text" placeholder="Tinggi Badan (Cm)"
-            class="w-80 bg-white rounded-md px-4 py-2 text-center text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500">
+            class="w-80 bg-white rounded-md px-4 py-2 text-center text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-700">
           <input type="text" placeholder="Berat Badan (Kg)"
-            class="w-80 bg-white rounded-md px-4 py-2 text-center text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500">
+            class="w-80 bg-white rounded-md px-4 py-2 text-center text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-green-700">
         </div>
       </div>
 

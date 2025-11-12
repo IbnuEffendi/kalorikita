@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
 
-  <body class="bg-[#FAFAFA] font-sans relative">
+  <body class="bg-[#F4F8F2] font-sans relative">
 
      <x-navbar></x-navbar>
 
@@ -40,7 +40,7 @@
           <span>Data & Pengiriman</span>
         </div>
 
-        <div class="w-16 h-[2px] bg-gray-300"></div>
+        <div class="w-16 h-0.5 bg-gray-300"></div>
 
         <!-- Step 2 -->
         <div class="flex items-center space-x-2">
@@ -50,7 +50,7 @@
           <span>Pembayaran</span>
         </div>
 
-        <div class="w-16 h-[2px] bg-gray-300"></div>
+        <div class="w-16 h-0.5 bg-gray-300"></div>
 
         <!-- Step 3 -->
         <div class="flex items-center space-x-2">

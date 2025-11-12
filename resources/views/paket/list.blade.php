@@ -103,7 +103,7 @@
                 <ul class="mt-2 space-y-2 text-sm text-gray-700">
                   @foreach ($paket['keuntungan'] as $benefit)
                     <li class="flex items-center gap-2">
-                      <span class="h-[6px] w-[6px] rounded-full bg-gray-900 inline-block"></span>
+                      <span class="h-1.5 w-1.5 rounded-full bg-gray-900 inline-block"></span>
                       {{ $benefit }}
                     </li>
                   @endforeach
