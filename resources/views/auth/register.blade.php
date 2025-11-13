@@ -143,14 +143,6 @@
             </p>
 
             <div class="space-y-3">
-                
-                <a href="#" id="tombol-login-google-palsu" class="flex items-center w-full p-3 border rounded-lg hover:bg-gray-50 transition-all">
-                    <img src="https://www.svgrepo.com/show/342111/google-account.svg" alt="Google Account" class="w-5 h-5 rounded-full">
-                    <div class="ml-4 text-left">
-                        <p class="font-semibold text-gray-800">Putas</p>
-                        <p class="text-sm text-gray-500">putriastini123@gmail.com</p>
-                    </div>
-                </a>
 
                 <a href="#" id="tombol-akun-lain" class="flex items-center w-full p-3 border rounded-lg hover:bg-gray-50 transition-all">
                     <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Logo Google" class="w-5 h-5 rounded-full">
