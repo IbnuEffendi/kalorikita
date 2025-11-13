@@ -26,7 +26,7 @@
         </li>
         <li>
           <a href="{{ url('/kalori-lab') }}"
-             class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-1 text-sm font-semibold hover:bg-yellow-300 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500/50">
+            class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-1 text-sm font-semibold hover:bg-yellow-300 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500/50">
             Lab Kalori
           </a>
         </li>
