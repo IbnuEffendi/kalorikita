@@ -19,12 +19,10 @@
 
         @include('profil.sidebar', ['activePage' => 'pesanan'])
 
-        <main class="w-3/4 bg-[#DAEFA2] p-10 overflow-y-auto relative">
+        <main class="w-3/4 bg-green-800 p-10 overflow-y-auto relative">
             
-            <div class="absolute inset-0 bg-repeat opacity-30" style="background-image: url('{{ asset('/asset/pattern1flip.png') }}')"></div>
-
             <div class="relative z-10">
-                <h1 class="text-3xl font-bold text-gray-900 mb-8">Pesanan Saya</h1>
+                <h1 class="text-3xl font-bold text-white mb-8">Pesanan Saya</h1>
                 
                 <section class="bg-white rounded-2xl shadow-lg overflow-hidden">
                     

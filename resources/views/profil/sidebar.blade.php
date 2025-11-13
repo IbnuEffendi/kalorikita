@@ -1,4 +1,4 @@
-<aside class="w-1/4 bg-[#0B7932] text-white p-8 relative overflow-y-auto">
+<aside class="w-1/4 bg-green-900 text-white p-8 relative overflow-y-auto">
     
     <div class="absolute inset-0 bg-repeat opacity-10" style="background-image: url('{{ asset('asset/pattern-kiri.png') }}')"></div>
 
@@ -20,7 +20,7 @@
             <span>Pesanan Saya</span>
         </a>
         
-        <a href="#" 
+        <a href="/kalori-tracker" 
            class="flex items-center gap-3 p-3 rounded-lg transition-all
                   {{ ($activePage == 'tracker') 
                      ? 'bg-white/40 font-semibold' 
