@@ -13,6 +13,9 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 
 Route::get('/kalori-lab', function () {
     return view('labkalori');
@@ -29,6 +32,10 @@ Route::get('/profil', function () {
 Route::get('/myorder', function () {
     return view('profil.myorder');
 })->name('profil.myorder');
+
+Route::get('/kalori-tracker', function () {
+    return view('profil.kalori-tracker'); // Ini manggil file kalori-tracker.blade.php
+})->name('profil.kalori-tracker');
 
 Route::get('/logout', function () {
     return view('profil.logout-modal');
