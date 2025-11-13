@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Buat Akun - Platform Gaya Hidup Sehat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
   </head>
   <body class="bg-green-900 flex justify-center items-center min-h-screen font-sans">
     <div class="bg-white rounded-2xl shadow-lg flex overflow-hidden w-[900px] max-w-full">
@@ -111,9 +112,13 @@
         </div>
 
         <button
+          type="button"
           id="tombol-google"
           class="w-full border border-gray-300 rounded-md py-2 flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-50"
         >
+          <img src="https://www.svgrepo.com/show/355037/google.svg"
+           alt="Logo Google"
+           class="w-6 h-6">
           <span class="font-medium">Daftar dengan Google</span>
         </button>
 
@@ -124,32 +129,85 @@
       </div>
     </div>
 
+    <div id="google-login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden">
+        <div id="tutup-modal-bg" class="absolute inset-0"></div>
+        
+        <div class="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-md p-8 text-center z-10 relative">
+            
+            <img src="{{ asset('asset/logo-nobg.png') }}" alt="Logo KaloriKita" class="h-20 mx-auto mb-4">
+            
+            <h1 class="text-2xl font-medium text-gray-900">Pilih akun</h1>
+            
+            <p class="text-gray-600 mt-2 mb-6">
+              untuk melanjutkan ke <span class="font-semibold">KaloriKita</span>
+            </p>
+
+            <div class="space-y-3">
+                
+                <a href="#" id="tombol-login-google-palsu" class="flex items-center w-full p-3 border rounded-lg hover:bg-gray-50 transition-all">
+                    <img src="https://www.svgrepo.com/show/342111/google-account.svg" alt="Google Account" class="w-5 h-5 rounded-full">
+                    <div class="ml-4 text-left">
+                        <p class="font-semibold text-gray-800">Putas</p>
+                        <p class="text-sm text-gray-500">putriastini123@gmail.com</p>
+                    </div>
+                </a>
+
+                <a href="#" id="tombol-akun-lain" class="flex items-center w-full p-3 border rounded-lg hover:bg-gray-50 transition-all">
+                    <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Logo Google" class="w-5 h-5 rounded-full">
+                    <div class="ml-4 text-left"> 
+                        <p class="font-semibold text-gray-800">Gunakan akun Google</p>
+                    </div>
+                </a>
+                </div>
+        </div>
+    </div>
+
+
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         
-        // Ini adalah fungsi 'pura-pura daftar & login'
+        // Fungsi simulasi (tetap sama)
         const simulasiDaftar = (event) => {
-          // 1. Mencegah form kirim data (karena kita cuma pura-pura)
           event.preventDefault(); 
-          
-          // 2. Buat "Tanda Pengenal" di browser
           localStorage.setItem('isLoggedIn', 'true');
-
-          // 3. Arahkan user ke Halaman Home
-          // (Ganti '/' dengan halaman home kamu jika beda, misal 'index.html')
           window.location.href = '/'; 
         };
 
-        // Pasang fungsi tadi ke Tombol Daftar
+        // Tombol Daftar (tetap sama)
         const tombolDaftar = document.getElementById('tombol-daftar');
         if (tombolDaftar) {
           tombolDaftar.addEventListener('click', simulasiDaftar);
         }
 
-        // Pasang fungsi tadi ke Tombol Google
-        const tombolGoogle = document.getElementById('tombol-google');
-        if (tombolGoogle) {
-          tombolGoogle.addEventListener('click', simulasiDaftar);
+        // --- Logika Baru untuk Pop-up Google ---
+        
+        // 1. Ambil elemen-elemen modal
+        const modal = document.getElementById('google-login-modal');
+        const bukaModalBtn = document.getElementById('tombol-google');
+        const tutupModalBg = document.getElementById('tutup-modal-bg');
+        const loginAkunPalsuBtn = document.getElementById('tombol-login-google-palsu');
+        const loginAkunLainBtn = document.getElementById('tombol-akun-lain');
+
+        // 2. Saat "Daftar dengan Google" diklik -> TAMPILKAN MODAL
+        if (bukaModalBtn && modal) {
+          bukaModalBtn.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+          });
+        }
+
+        // 3. Saat background gelap diklik -> TUTUP MODAL
+        if (tutupModalBg && modal) {
+          tutupModalBg.addEventListener('click', () => {
+            modal.classList.add('hidden');
+          });
+        }
+
+        // 4. Saat akun palsu ATAU akun lain diklik -> LOGIN & TUTUP
+        if (loginAkunPalsuBtn) {
+          loginAkunPalsuBtn.addEventListener('click', simulasiDaftar); 
+        }
+        if (loginAkunLainBtn) {
+          loginAkunLainBtn.addEventListener('click', simulasiDaftar);
         }
 
       });
