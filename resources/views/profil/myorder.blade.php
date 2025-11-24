@@ -7,6 +7,7 @@
 
     <link rel="preconnect" href="https.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -46,7 +47,7 @@
                     
                     <div class="text-center py-20 px-10">
                         <h3 class="text-xl font-semibold text-gray-700 mb-2">Tidak ada pesanan</h3>
-                        <p class="text-gray-500 mb-6">Anda belum memiliki riwayat pesanan.</p>
+                        <p class="text-sm text-gray-500 mb-6">Anda belum memiliki riwayat pesanan.</p>
                         
                         <a href="{{ route('paket.list') }}" class="rounded-full bg-yellow-400 px-8 py-3 text-sm font-semibold text-black hover:bg-yellow-300 transition-all">
                             Lanjut Berbelanja
