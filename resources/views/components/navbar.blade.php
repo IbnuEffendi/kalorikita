@@ -1,6 +1,7 @@
 <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-slate-400/60 drop-shadow-lg">
   <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="KaloriKita">
     <div class="flex h-16 items-center justify-between">
+      
       <a href="{{ url('/') }}" class="flex items-center gap-3 shrink-0 group" aria-label="KaloriKita Home">
         <img src="{{ asset('asset/logo-nobg.png') }}" alt="logo" class="h-24">
       </a>
@@ -33,11 +34,13 @@
       </ul>
 
       <div class="hidden md:flex items-center gap-3">
+        
         <a href="{{ route('paket.list') }}"
            class="btn inline-flex items-center gap-2 rounded-full bg-yellow-400 px-5 py-2 text-sm font-semibold text-slate-900 hover:bg-yellow-300 active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500/60">
           Beli Paket
         </a>
 
+        @guest
         <div id="nav-guest-desktop" class="flex items-center gap-3">
           <a href="{{ route('login') }}"
              class="btn inline-flex items-center rounded-full border-2 border-green-800 px-6 py-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/40">
@@ -48,14 +51,19 @@
             Daftar
           </a>
         </div>
+        @endguest
 
-        <div id="nav-user-desktop" class="hidden items-center gap-3">
+        @auth
+        <div id="nav-user-desktop" class="flex items-center gap-3">
           <a href="{{ url('/profil') }}"
-             class="btn inline-flex items-center rounded-full bg-green-800 px-6 py-2 text-sm font-semibold text-white hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/60">
-            Profil Saya
+             class="btn inline-flex items-center gap-2 rounded-full bg-green-800 px-6 py-2 text-sm font-semibold text-white hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/60">
+             <i class='bx bx-user'></i> Profil Saya
           </a>
         </div>
+        @endauth
+
       </div>
+
       <button id="menuBtn"
               class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/40"
               aria-label="Buka menu">
@@ -76,33 +84,37 @@
           Lab Kalori
         </a>
 
-        <div class="mt-2 flex items-center gap-3">
-          <a href="{{ route('paket.list') }}"
-             class="btn inline-flex items-center gap-2 rounded-full bg-yellow-400 px-5 py-2 text-sm font-semibold text-slate-900 hover:bg-yellow-300 active:translate-y-[1px]">
+        <div class="mt-2 flex flex-col gap-3"> <a href="{{ route('paket.list') }}"
+             class="btn inline-flex justify-center items-center gap-2 rounded-full bg-yellow-400 px-5 py-2 text-sm font-semibold text-slate-900 hover:bg-yellow-300 active:translate-y-[1px]">
             Beli Paket
           </a>
 
-          <div id="nav-guest-mobile" class="flex items-center gap-3">
+          @guest
+          <div id="nav-guest-mobile" class="flex items-center gap-3 w-full">
             <a href="{{ route('login') }}"
-               class="btn inline-flex items-center rounded-full border-2 border-green-800 px-5 py-2 text-sm font-semibold text-green-800 hover:bg-green-50">
+               class="btn flex-1 inline-flex justify-center items-center rounded-full border-2 border-green-800 px-5 py-2 text-sm font-semibold text-green-800 hover:bg-green-50">
               Masuk
             </a>
             <a href="{{ route('register') }}"
-               class="btn inline-flex items-center rounded-full bg-green-800 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700">
+               class="btn flex-1 inline-flex justify-center items-center rounded-full bg-green-800 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700">
               Daftar
             </a>
           </div>
+          @endguest
 
-          <div id="nav-user-mobile" class="hidden items-center gap-3">
-            <a href="{{ url('/profil') }}"
-               class="btn inline-flex items-center rounded-full bg-green-800 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700">
+          @auth
+          <div id="nav-user-mobile" class="flex items-center gap-3 w-full">
+             <a href="{{ url('/profil') }}"
+               class="btn w-full inline-flex justify-center items-center rounded-full bg-green-800 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700">
               Profil Saya
             </a>
           </div>
+          @endauth
+
         </div>
       </div>
     </div>
-    </nav>
+  </nav>
 </header>
 
 <script>
