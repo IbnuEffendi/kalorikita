@@ -181,7 +181,7 @@
           <!-- Tombol Bayar Sekarang -->
           <a
             href="{{ route('pesanan.success') }}"
-            class="block w-full mt-8 py-3 bg-[#FDCB5D] hover:bg-[#e6b94d] text-black font-semibold rounded-xl text-center transition"
+            class="block w-full mt-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-xl text-center transition"
           >
             Bayar Sekarang
           </a>
