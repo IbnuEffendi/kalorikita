@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Masuk - Platform Gaya Hidup Sehat</title>
+    <title>Masuk - KaloriKita</title>
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
   </head>
@@ -65,7 +65,10 @@
             Masuk
           </button>
 
-          <p class="text-left text-sm text-gray-800 font-semibold">Lupa Kata Sandi?</p>
+          <a href="{{ route('password.forgot') }}"
+            class="text-left text-sm text-gray-800 font-semibold hover:underline">
+            <span class="block mt-2">Lupa Kata Sandi?</span>
+          </a>
 
           <div class="flex items-center my-4">
             <hr class="grow border-gray-200" />
@@ -175,7 +178,3 @@
     </script>
   </body>
 </html>
-
-
-
-
