@@ -18,18 +18,12 @@
 
     <!-- SECTION: MENU KAMI -->
     <section
-      class="relative bg-[#DAEFA2] overflow-hidden"
+      class="relative bg-green-900 overflow-hidden"
     >
-    <div class="background flex justify-between absolute w-full pointer-events-none">
-      <img class="" src="/asset/pattern1.png" alt="background">
-      <img class="" src="/asset/pattern1flip.png" alt="background">
-    </div>
-      <!-- Ganti '/asset/menu-pattern.png' dengan file pattern background kamu -->
-
       <div class="max-w-6xl mx-auto px-6 py-16 relative z-10">
         <!-- Judul -->
         <div class="text-center mb-20">
-          <h2 class="text-3xl font-bold text-[#155C2E] mb-2">Menu Kami</h2>
+          <h2 class="text-3xl font-bold text-white mb-2">Menu Kami</h2>
           <div class="w-20 h-[3px] bg-[#FBBF24] mx-auto rounded"></div>
         </div>
 
@@ -295,20 +289,20 @@
       <!-- ===================== PAGINATION ===================== -->
       <div class="mt-12 flex items-center justify-center gap-4 relative z-10">
         <button
-          class="w-10 h-10 flex items-center justify-center bg-[#2F6F3B] text-white rounded-md shadow-md hover:bg-[#24582E] transition">
+          class="w-10 h-10 flex items-center justify-center bg-green-700 text-white rounded-md shadow-md hover:bg-green-800 transition">
           ◀
         </button>
-        <button class="w-12 h-12 flex items-center justify-center bg-[#2F6F3B] text-white rounded-xl font-extrabold shadow-md">
+        <button class="w-12 h-12 flex items-center justify-center bg-green-700 text-white rounded-xl font-extrabold shadow-md">
           1
         </button>
-        <button class="w-12 h-12 flex items-center justify-center bg-white ring-1 ring-gray-200 rounded-xl hover:bg-gray-100 transition">
+        <button class="w-12 h-12 flex items-center justify-center bg-white ring-gray-200 rounded-xl hover:bg-gray-100 transition">
           2
         </button>
         <button class="w-12 h-12 flex items-center justify-center bg-white ring-1 ring-gray-200 rounded-xl hover:bg-gray-100 transition">
           3
         </button>
         <button
-          class="w-10 h-10 flex items-center justify-center bg-[#2F6F3B] text-white rounded-md shadow-md hover:bg-[#24582E] transition">
+          class="w-10 h-10 flex items-center justify-center bg-green-700 text-white rounded-md shadow-md hover:bg-green-800 transition">
           ▶
         </button>
       </div>

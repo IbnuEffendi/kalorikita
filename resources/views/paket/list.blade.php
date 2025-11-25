@@ -93,9 +93,9 @@
               </div>
 
               <a
-                href="{{ route('paket.checkout', ['plan' => $paket['slug']]) }}?paket={{ $paket['slug'] }}&harga={{ $paket['harga'] }}"
-                class="mt-4 block rounded-full bg-[#2F6F3B] text-white text-center font-semibold py-2 hover:bg-[#24582E] transition">
-                Pilih Paket
+                href="{{ route('paket.detail', $paket['slug']) }}"
+                class="mt-4 block rounded-full bg-[#2F6F3B] text-white text-center font-semibold py-2 hover:bg-[#24582E] transition shadow-md transform hover:-translate-y-1">
+                Lihat Detail & Pesan
               </a>
 
               <div class="mt-5">
