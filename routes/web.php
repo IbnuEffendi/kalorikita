@@ -13,10 +13,6 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
 Route::get('/kalori-lab', function () {
     return view('labkalori');
 });
