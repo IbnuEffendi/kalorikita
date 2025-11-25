@@ -57,7 +57,7 @@
         <div id="nav-user-desktop" class="flex items-center gap-3">
           <a href="{{ url('/profil') }}"
              class="btn inline-flex items-center gap-2 rounded-full bg-green-800 px-6 py-2 text-sm font-semibold text-white hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/60">
-             <i class='bx bx-user'></i> Profil Saya
+             <i class='bx bx-user'></i> Profil
           </a>
         </div>
         @endauth

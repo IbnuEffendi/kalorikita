@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,9 +49,11 @@ Route::get('/kalori-tracker', function () {
     return view('profil.kalori-tracker');
 })->name('profil.kalori.tracker');
 
-Route::get('/logout', function () {
-    return view('profil.logout-modal');
-})->name('profil.logout.modal');
+Route::post('/logout', function () {
+    auth()->logout();
+    return redirect('/'); // kembali ke home
+})->name('logout');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -131,19 +135,51 @@ Route::get('/paket/{slug}', function ($slug) {
 |--------------------------------------------------------------------------
 */
 
-// Halaman forgot password (1 file: input email → OTP → new password)
 Route::get('/forgot-password', function () {
     return view('auth.forgot-password');
 })->name('password.forgot');
 
-// Kirim OTP ke email
 Route::post('/forgot-password/send-otp', [AuthController::class, 'sendOtp'])
     ->name('password.sendOtp');
 
-// Verifikasi OTP
 Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyOtp'])
     ->name('password.verifyOtp');
 
-// Reset Password
 Route::post('/forgot-password/reset', [AuthController::class, 'resetPassword'])
     ->name('password.reset');
+
+
+/*
+|--------------------------------------------------------------------------
+| GOOGLE AUTH ROUTES (FINAL)
+|--------------------------------------------------------------------------
+*/
+
+// Redirect ke Google
+Route::get('/auth/google', function () {
+    return \Laravel\Socialite\Facades\Socialite::driver('google')->redirect();
+})->name('google.login');
+
+// Callback dari Google
+Route::get('/auth/google/callback', function () {
+    $googleUser = \Laravel\Socialite\Facades\Socialite::driver('google')->stateless()->user();
+
+    $user = \App\Models\User::where('email', $googleUser->getEmail())->first();
+
+    if (!$user) {
+        $user = \App\Models\User::create([
+            'name'      => $googleUser->getName(),
+            'email'     => $googleUser->getEmail(),
+            'google_id' => $googleUser->getId(),
+            'password'  => bcrypt('google-login'), // dummy password
+        ]);
+    } elseif (!$user->google_id) {
+        $user->update([
+            'google_id' => $googleUser->getId(),
+        ]);
+    }
+
+    auth()->login($user);
+
+    return redirect()->route('profil.dashboard');
+});

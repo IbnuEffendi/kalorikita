@@ -7,11 +7,15 @@
             <button id="batal-logout-btn" class="flex-1 rounded-full bg-gray-200 px-6 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-300 transition-all">
                 Batal
             </button>
-            
-            <button id="ya-keluar-btn" class="flex-1 flex items-center justify-center gap-2 rounded-full bg-green-800 px-6 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-all">
-                <i class='bx bx-log-out text-lg'></i>
-                Ya, Keluar
-            </button>
+
+            <form action="{{ route('logout') }}" method="POST" class="flex-1">
+                @csrf
+                <button type="submit"
+                    class="w-full flex items-center justify-center gap-2 rounded-full bg-green-800 px-6 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-all">
+                    <i class='bx bx-log-out text-lg'></i>
+                    Ya, Keluar
+                </button>
+            </form>
         </div>
     </div>
 </div>
