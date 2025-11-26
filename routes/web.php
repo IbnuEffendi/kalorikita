@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LabController;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 
@@ -26,6 +27,9 @@ Route::get('/login', function () {
 Route::get('/kalori-lab', function () {
     return view('labkalori');
 });
+
+Route::post('/kalori-lab/insight', [LabController::class, 'insight'])
+     ->name('lab.insight');
 
 Route::get('/menu', function () {
     return view('components.food-menu');

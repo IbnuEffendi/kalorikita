@@ -9,6 +9,10 @@ return [
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],
+    
+    'gemini' => [
+    'key' => env('GEMINI_API_KEY'),
+    ],
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
