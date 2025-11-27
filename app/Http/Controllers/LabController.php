@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserTarget;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class LabController extends Controller
 {
@@ -24,7 +27,7 @@ class LabController extends Controller
             ], 400);
         }
 
-        // === REQUEST ke Gemini REST API ===
+        // REQUEST ke Gemini
         $response = Http::withHeaders([
             'Content-Type'   => 'application/json',
             'x-goog-api-key' => $apiKey,
@@ -41,9 +44,8 @@ class LabController extends Controller
             ]
         );
 
-        // Jika error dari Gemini
         if (!$response->successful()) {
-            \Log::error('Gemini REST API Error', [
+            Log::error('Gemini REST API Error', [
                 'status' => $response->status(),
                 'body'   => $response->json(),
             ]);
@@ -54,11 +56,31 @@ class LabController extends Controller
             ], $response->status());
         }
 
-        $data = $response->json();
+        $data    = $response->json();
         $insight = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+        $insight = $insight ?? 'AI tidak mengembalikan hasil.';
+
+        // ==== SIMPAN KE user_targets (jika user login) ====
+        if (Auth::check()) {
+            UserTarget::updateOrCreate(
+                ['user_id' => Auth::id()],
+                [
+                    'bmr'            => (int) $request->input('bmr'),
+                    'tdee'           => (int) $request->input('tdee'),
+                    'kalori_target'  => (int) $request->input('kalori_target'),
+                    'karbo_target'   => (int) $request->input('karbo_target'),
+                    'protein_target' => (int) $request->input('protein_target'),
+                    'lemak_target'   => (int) $request->input('lemak_target'),
+                    'goal'           => $request->input('goal'), // weightloss / maintain / bulking
+                    'insight'        => $insight,
+                ]
+            );
+        }
 
         return response()->json([
-            'insight' => $insight ?? 'AI tidak mengembalikan hasil.',
+            'insight' => $insight,
         ]);
     }
+
+    
 }

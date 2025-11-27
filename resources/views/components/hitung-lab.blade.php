@@ -20,143 +20,259 @@
 
 <body class="bg-green-900 text-gray-900">
 
-    <section id="lab-section" class="w-full min-h-screen flex justify-center items-center py-20 px-4">
+    <section id="lab-section" class="w-full min-h-screen flex justify-center items-center px-4">
 
         <div class="relative w-full max-w-6xl bg-green-800 rounded-[2.5rem] shadow-2xl p-8 md:p-12">
+            <center><h1 class="uppercase font-bold text-yellow-400 text-2xl pb-8">Kalori Lab</h1></center>
 
             <!-- WRAPPER FORM HITUNG -->
             <div id="lab-form-wrapper">
-                <form id="lab-form" action="#" method="POST">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+                <form id="lab-form" class="space-y-5">
 
-                        <div class="flex flex-col items-center w-full">
+                    <!-- CARD: PROFIL KAMU -->
+                    <div class="bg-green-900/80 border border-green-700/80 rounded-2xl p-4">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
 
-                            <div class="text-center mb-8">
-                                <h2 class="text-2xl font-semibold text-white mb-2">Informasi Personal</h2>
-                                <div class="h-1 w-16 bg-yellow-400 mx-auto rounded-full"></div>
+                            <!-- Kiri: judul & keterangan -->
+                            <div class="md:w-2/5">
+                                <p class="text-[11px] font-bold text-green-100/70 uppercase tracking-wide">
+                                    Profil Kamu
+                                </p>
+                                <p class="text-xs text-green-100/80 mt-1">
+                                    Kita gunakan data ini untuk menghitung BMI, BMR, dan kebutuhan kalori
+                                    yang paling mendekati kondisi tubuhmu saat ini.
+                                </p>
+                                <p class="mt-2 text-[11px] text-green-100/70">
+                                    Usahakan input sedekat mungkin dengan kondisi nyata agar rekomendasi lebih akurat.
+                                </p>
                             </div>
 
-                            <!-- GENDER -->
-                            <div class="flex justify-center gap-6 mb-8 w-full max-w-md">
-                                <label class="cursor-pointer group w-1/2">
-                                    <input type="radio" name="gender" value="male" class="hidden peer" />
-                                    <div
-                                        class="flex flex-col items-center gap-3 border-2 border-transparent bg-white peer-checked:bg-[#DAEFA2] peer-checked:border-green-400 rounded-2xl px-4 py-6 transition-all shadow-md hover:scale-105 w-full h-full justify-center">
-                                        <img src="/asset/laki.png" alt="Laki-laki" class="w-16 h-16 object-contain">
-                                        <span class="text-sm font-bold text-gray-800">Laki-Laki</span>
+                            <!-- Kanan: GENDER + USIA/TB/BB -->
+                            <div class="md:w-3/5 space-y-3">
+                                <!-- Gender chips -->
+                                <div>
+                                    <p class="text-[11px] text-green-100/75 mb-1">Jenis Kelamin</p>
+                                    <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="gender" value="male" class="hidden peer" />
+                                            <div
+                                                class="flex items-center justify-center gap-2 rounded-2xl 
+                                           bg-green-900/80 border border-green-700/80
+                                           peer-checked:bg-yellow-400 peer-checked:border-yellow-300
+                                           peer-checked:text-green-900
+                                           text-green-100 px-3 py-2 transition">
+                                                <span class="text-lg">👨</span>
+                                                <span class="font-semibold">Laki-laki</span>
+                                            </div>
+                                        </label>
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="gender" value="female" class="hidden peer" />
+                                            <div
+                                                class="flex items-center justify-center gap-2 rounded-2xl 
+                                           bg-green-900/80 border border-green-700/80
+                                           peer-checked:bg-yellow-400 peer-checked:border-yellow-300
+                                           peer-checked:text-green-900
+                                           text-green-100 px-3 py-2 transition">
+                                                <span class="text-lg">👩</span>
+                                                <span class="font-semibold">Perempuan</span>
+                                            </div>
+                                        </label>
                                     </div>
-                                </label>
-
-                                <label class="cursor-pointer group w-1/2">
-                                    <input type="radio" name="gender" value="female" class="hidden peer" />
-                                    <div
-                                        class="flex flex-col items-center gap-3 border-2 border-transparent bg-white peer-checked:bg-[#DAEFA2] peer-checked:border-green-400 rounded-2xl px-4 py-6 transition-all shadow-md hover:scale-105 w-full h-full justify-center">
-                                        <img src="/asset/perempuan.png" alt="Perempuan"
-                                            class="w-16 h-16 object-contain">
-                                        <span class="text-sm font-bold text-gray-800">Perempuan</span>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <span id="form-warning"
-                                class="text-sm text-red-400 font-bold drop-shadow-md block mb-6 text-center animate-pulse">
-                                *Lengkapi Data Diri Anda
-                            </span>
-
-                            <!-- INPUT USIA / TB / BB -->
-                            <div class="flex flex-col items-center space-y-4 w-full max-w-md">
-                                <input id="usia-input" type="number" min="10" max="80"
-                                    placeholder="Usia (Tahun)"
-                                    class="w-full bg-white rounded-xl px-6 py-3 text-center font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-inner">
-
-                                <input id="tb-input" type="number" min="100" max="230"
-                                    placeholder="Tinggi Badan (Cm)"
-                                    class="w-full bg-white rounded-xl px-6 py-3 text-center font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-inner">
-
-                                <input id="bb-input" type="number" min="20" max="200"
-                                    placeholder="Berat Badan (Kg)"
-                                    class="w-full bg-white rounded-xl px-6 py-3 text-center font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-inner">
-                            </div>
-                        </div>
-
-                        <div class="lg:hidden w-full h-0.5 bg-green-700/50"></div>
-
-                        <!-- AKTIVITAS & TUJUAN -->
-                        <div class="flex flex-col items-center justify-between w-full h-full">
-
-                            <!-- Aktivitas -->
-                            <div class="w-full flex flex-col items-center mb-10">
-                                <h3 class="text-2xl font-semibold text-white mb-2">Aktivitas</h3>
-                                <div class="h-1 w-12 bg-yellow-400 mb-8 rounded-full"></div>
-
-                                <div class="grid grid-cols-3 gap-4 w-full max-w-md">
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="aktivitas" value="ringan" class="hidden peer" />
-                                        <div
-                                            class="h-20 flex items-center justify-center bg-white text-gray-700 font-bold rounded-xl border-2 border-transparent peer-checked:bg-[#DAEFA2] peer-checked:text-green-800 peer-checked:border-green-500 transition-all hover:bg-gray-50 px-2 text-center text-sm sm:text-base">
-                                            Ringan</div>
-                                    </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="aktivitas" value="sedang" class="hidden peer" />
-                                        <div
-                                            class="h-20 flex items-center justify-center bg-white text-gray-700 font-bold rounded-xl border-2 border-transparent peer-checked:bg-[#DAEFA2] peer-checked:text-green-800 peer-checked:border-green-500 transition-all hover:bg-gray-50 px-2 text-center text-sm sm:text-base">
-                                            Sedang</div>
-                                    </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="aktivitas" value="berat" class="hidden peer" />
-                                        <div
-                                            class="h-20 flex items-center justify-center bg-white text-gray-700 font-bold rounded-xl border-2 border-transparent peer-checked:bg-[#DAEFA2] peer-checked:text-green-800 peer-checked:border-green-500 transition-all hover:bg-gray-50 px-2 text-center text-sm sm:text-base">
-                                            Berat</div>
-                                    </label>
                                 </div>
-                            </div>
 
-                            <div class="w-full max-w-md h-0.5 bg-green-600/30 mb-10"></div>
-
-                            <!-- Tujuan -->
-                            <div class="w-full flex flex-col items-center">
-                                <h3 class="text-2xl font-semibold text-white mb-2">Tujuan</h3>
-                                <div class="h-1 w-12 bg-yellow-400 mb-8 rounded-full"></div>
-
-                                <div class="grid grid-cols-3 gap-4 w-full max-w-md">
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="tujuan" value="turun" class="hidden peer" />
-                                        <div
-                                            class="h-20 flex items-center justify-center bg-white text-gray-700 font-bold rounded-xl border-2 border-transparent peer-checked:bg-[#DAEFA2] peer-checked:text-green-800 peer-checked:border-green-500 transition-all hover:bg-gray-50 px-2 text-center text-sm sm:text-base">
-                                            Turun</div>
-                                    </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="tujuan" value="pertahankan"
-                                            class="hidden peer" />
-                                        <div
-                                            class="h-20 flex items-center justify-center bg-white text-gray-700 font-bold rounded-xl border-2 border-transparent peer-checked:bg-[#DAEFA2] peer-checked:text-green-800 peer-checked:border-green-500 transition-all hover:bg-gray-50 px-2 text-center text-xs sm:text-sm font-bold leading-tight">
-                                            Pertahankan</div>
-                                    </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="tujuan" value="naik" class="hidden peer" />
-                                        <div
-                                            class="h-20 flex items-center justify-center bg-white text-gray-700 font-bold rounded-xl border-2 border-transparent peer-checked:bg-[#DAEFA2] peer-checked:text-green-800 peer-checked:border-green-500 transition-all hover:bg-gray-50 px-2 text-center text-sm sm:text-base">
-                                            Naik</div>
-                                    </label>
+                                <!-- Usia, TB, BB -->
+                                <div>
+                                    <p class="text-[11px] text-green-100/75 mb-1">Data Fisik</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                                        <div class="space-y-1">
+                                            <p class="text-green-100/70">Usia (Tahun)</p>
+                                            <input id="usia-input" type="number" min="10" max="80"
+                                                placeholder="Tahun"
+                                                class="w-full bg-white border border-green-700/80 rounded-xl px-2 py-1.5 text-center text-[11px] focus:outline-none focus:ring-2 focus:ring-yellow-400/70">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-green-100/70">Tinggi Badan (Cm)</p>
+                                            <input id="tb-input" type="number" min="100" max="230"
+                                                placeholder="cm"
+                                                class="w-full bg-white border border-green-700/80 rounded-xl px-2 py-1.5 text-center text-[11px] focus:outline-none focus:ring-2 focus:ring-yellow-400/70">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-green-100/70">Berat Badan (Kg)</p>
+                                            <input id="bb-input" type="number" min="20" max="200"
+                                                placeholder="kg"
+                                                class="w-full bg-white border border-green-700/80 rounded-xl px-2 py-1.5 text-center text-[11px] focus:outline-none focus:ring-2 focus:ring-yellow-400/70">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                         </div>
                     </div>
 
-                    <div class="relative flex flex-col sm:flex-row justify-center gap-6 mt-16">
-                        <button type="submit"
-                            class="bg-yellow-400 hover:bg-yellow-300 text-green-900 font-bold text-lg px-12 py-3 rounded-full shadow-lg transition-all transform hover:-translate-y-1">
-                            Hitung
-                        </button>
-                        <button type="reset"
-                            class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-green-900 font-bold text-lg px-12 py-3 rounded-full shadow-lg transition-all transform hover:-translate-y-1">
-                            Reset
-                        </button>
+                    <!-- CARD: AKTIVITAS & TUJUAN (2 KARTU SEJAJAR) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <!-- Aktivitas -->
+                        <div class="bg-green-900/80 border border-green-700/80 rounded-2xl p-4 space-y-3">
+                            <div>
+                                <p class="text-[11px] text-green-100/70 uppercase tracking-wide">Aktivitas Harian</p>
+                                <p class="text-xs text-green-100/80">
+                                    Pilih gambaran aktivitasmu dalam 1 hari.
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                                <!-- Ringan -->
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="aktivitas" value="ringan" class="hidden peer" />
+                                    <div
+                                        class="h-full flex flex-col items-start justify-between rounded-2xl 
+                                   bg-green-900/80 border border-green-700/80
+                                   peer-checked:bg-yellow-400 peer-checked:border-yellow-300
+                                   peer-checked:text-green-900
+                                   text-green-50 px-3 py-2.5 transition">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-lg">🛋️</span>
+                                            <span class="font-semibold text-xs">Ringan</span>
+                                        </div>
+                                        <p class="text-[10px] leading-snug">
+                                            Banyak duduk, jalan seperlunya (kuliah/kerja kantoran, minim olahraga).
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <!-- Sedang -->
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="aktivitas" value="sedang" class="hidden peer" />
+                                    <div
+                                        class="h-full flex flex-col items-start justify-between rounded-2xl 
+                                   bg-green-900/80 border border-green-700/80
+                                   peer-checked:bg-yellow-400 peer-checked:border-yellow-300
+                                   peer-checked:text-green-900
+                                   text-green-50 px-3 py-2.5 transition">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-lg">🚶‍♂️</span>
+                                            <span class="font-semibold text-xs">Sedang</span>
+                                        </div>
+                                        <p class="text-[10px] leading-snug">
+                                            Banyak berjalan, naik turun tangga, olahraga ringan 3–5x/minggu.
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <!-- Berat -->
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="aktivitas" value="berat" class="hidden peer" />
+                                    <div
+                                        class="h-full flex flex-col items-start justify-between rounded-2xl 
+                                   bg-green-900/80 border border-green-700/80
+                                   peer-checked:bg-yellow-400 peer-checked:border-yellow-300
+                                   peer-checked:text-green-900
+                                   text-green-50 px-3 py-2.5 transition">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-lg">🏃‍♂️</span>
+                                            <span class="font-semibold text-xs">Berat</span>
+                                        </div>
+                                        <p class="text-[10px] leading-snug">
+                                            Kerja fisik/latihan intens (gym, olahraga berat, kerja lapangan).
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Tujuan -->
+                        <div class="bg-green-900/80 border border-green-700/80 rounded-2xl p-4 space-y-3">
+                            <div>
+                                <p class="text-[11px] text-green-100/70 uppercase tracking-wide">Tujuan Kamu</p>
+                                <p class="text-xs text-green-100/80">
+                                    Pilih arah perubahan berat badan yang diinginkan.
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                                <!-- Turun -->
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="tujuan" value="turun" class="hidden peer" />
+                                    <div
+                                        class="h-full flex flex-col items-start justify-between rounded-2xl 
+                                   bg-green-900/80 border border-green-700/80
+                                   peer-checked:bg-yellow-400 peer-checked:border-yellow-300
+                                   peer-checked:text-green-900
+                                   text-green-50 px-3 py-2.5 transition">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-lg">🎯</span>
+                                            <span class="font-semibold text-xs">Turun</span>
+                                        </div>
+                                        <p class="text-[10px] leading-snug">
+                                            Fokus defisit kalori untuk menurunkan berat badan bertahap.
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <!-- Pertahankan -->
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="tujuan" value="pertahankan" class="hidden peer" />
+                                    <div
+                                        class="h-full flex flex-col items-start justify-between rounded-2xl 
+                                   bg-green-900/80 border border-green-700/80
+                                   peer-checked:bg-yellow-400 peer-checked:border-yellow-300
+                                   peer-checked:text-green-900
+                                   text-green-50 px-3 py-2.5 transition">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-lg">⚖️</span>
+                                            <span class="font-semibold text-xs">Pertahankan</span>
+                                        </div>
+                                        <p class="text-[10px] leading-snug">
+                                            Menjaga berat badan sekarang tetap stabil dan seimbang.
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <!-- Naik -->
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="tujuan" value="naik" class="hidden peer" />
+                                    <div
+                                        class="h-full flex flex-col items-start justify-between rounded-2xl 
+                                   bg-green-900/80 border border-green-700/80
+                                   peer-checked:bg-yellow-400 peer-checked:border-yellow-300
+                                   peer-checked:text-green-900
+                                   text-green-50 px-3 py-2.5 transition">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-lg">💪</span>
+                                            <span class="font-semibold text-xs">Naik</span>
+                                        </div>
+                                        <p class="text-[10px] leading-snug">
+                                            Menambah berat badan (bulking) dengan cara yang terkontrol.
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- WARNING + TOMBOL -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mt-2">
+                        <span id="form-warning" class="hidden text-[11px] text-red-300 font-semibold">
+                            *Lengkapi semua data terlebih dahulu
+                        </span>
+
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <button type="submit"
+                                class="flex-1 sm:flex-none inline-flex items-center justify-center rounded-full bg-yellow-400 text-green-900 text-xs sm:text-sm font-semibold px-6 py-2.5 shadow-md hover:bg-yellow-300 transition">
+                                Hitung Kalori
+                            </button>
+                            <button type="reset"
+                                class="flex-1 sm:flex-none inline-flex items-center justify-center rounded-full border border-green-200 text-green-100 text-xs sm:text-sm font-semibold px-6 py-2.5 hover:bg-green-100/10 transition">
+                                Reset
+                            </button>
+                        </div>
                     </div>
 
                 </form>
             </div>
+
 
             <!-- WRAPPER HASIL ANALISIS (AWALNYA HIDDEN) -->
             <div id="lab-result-wrapper" class="hidden text-white">
@@ -269,67 +385,82 @@
                             </div>
                         </div>
 
-                        <!-- INSIGHT AI CARD -->
+                        <!-- INSIGHT (NON-AI UNTUK UMUM) -->
                         <div class="bg-green-900/60 border border-green-500/40 rounded-2xl p-5 shadow-lg">
-                            <div class="flex items-center gap-2 mb-3">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-green-900 font-extrabold text-lg">
-                                    AI
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-green-900 font-extrabold text-lg">
+                                        AI
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-yellow-300">Insight & Saran Singkat</h3>
                                 </div>
-                                <h3 class="text-lg font-semibold text-yellow-300">Insight Rekomendasi</h3>
+                                <span
+                                    class="text-[11px] px-3 py-1 rounded-full bg-green-950/70 text-yellow-200 font-semibold">
+                                    Fitur AI penuh: Login
+                                </span>
                             </div>
-                            <p id="result-insight" class="text-sm text-green-100 leading-relaxed line-clamp-3">
-                                Insight AI akan muncul di sini.
+
+                            <p class="text-xs text-green-100/80 mb-2">
+                                Di halaman demo ini kamu bisa lihat perhitungan BMI, BMR, TDEE, dan makro. Insight di
+                                bawah ini
+                                dibuat otomatis sederhana (bukan AI). Untuk insight AI yang lebih personal dan tersimpan
+                                di akunmu,
+                                silakan login.
                             </p>
 
-                            <button id="view-more-btn"
-                                class="mt-3 text-yellow-400 hover:text-yellow-300 text-sm font-semibold underline hidden">
-                                View More
-                            </button>
+                            <p id="result-insight" class="text-sm text-green-100 leading-relaxed">
+                                Setelah menghitung, saran singkat akan muncul di sini.
+                            </p>
+
+                            <a href="{{ route('login') }}"
+                                class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-full bg-yellow-400 text-green-900 text-xs font-semibold hover:bg-yellow-300 transition">
+                                Login untuk membuka KaloriLab (AI) versi penuh
+                            </a>
 
                             <button id="back-edit-mobile" type="button"
-                                class="mt-5 w-full md:hidden bg-yellow-400 text-green-900 font-bold text-sm px-4 py-2 rounded-full shadow hover:bg-yellow-300 transition">
+                                class="mt-3 w-full md:hidden bg-transparent border border-yellow-400 text-yellow-300 font-bold text-sm px-4 py-2 rounded-full shadow hover:bg-yellow-400 hover:text-green-900 transition">
                                 Ubah Data
                             </button>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
-            </div>
 
-            <!-- MODAL FULL INSIGHT -->
-            <div id="insight-modal"
-                class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50">
+                <!-- MODAL FULL INSIGHT -->
+                <div id="insight-modal"
+                    class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50">
 
-                <div class="bg-green-800 rounded-2xl max-w-lg w-full mx-4 p-6 shadow-xl relative">
+                    <div class="bg-green-800 rounded-2xl max-w-lg w-full mx-4 p-6 shadow-xl relative">
 
-                    <button id="close-modal" class="absolute top-3 right-3 text-yellow-300 text-xl font-bold">
-                        ✕
-                    </button>
-
-                    <h3 class="text-xl font-semibold text-yellow-400 mb-4">Insight Lengkap</h3>
-
-                    <div id="modal-insight-content"
-                        class="text-sm text-green-100 leading-relaxed space-y-3 overflow-y-auto max-h-[60vh] pr-2">
-                        <!-- Full insight AI akan masuk ke sini -->
-                    </div>
-
-                    <div class="mt-6 text-right">
-                        <button id="close-modal-bottom"
-                            class="px-6 py-2 rounded-full bg-yellow-400 text-green-900 font-bold hover:bg-yellow-300">
-                            Tutup
+                        <button id="close-modal" class="absolute top-3 right-3 text-yellow-300 text-xl font-bold">
+                            ✕
                         </button>
+
+                        <h3 class="text-xl font-semibold text-yellow-400 mb-4">Insight Lengkap</h3>
+
+                        <div id="modal-insight-content"
+                            class="text-sm text-green-100 leading-relaxed space-y-3 overflow-y-auto max-h-[60vh] pr-2">
+                            <!-- Full insight AI akan masuk ke sini -->
+                        </div>
+
+                        <div class="mt-6 text-right">
+                            <button id="close-modal-bottom"
+                                class="px-6 py-2 rounded-full bg-yellow-400 text-green-900 font-bold hover:bg-yellow-300">
+                                Tutup
+                            </button>
+                        </div>
+
                     </div>
-
                 </div>
+
+
             </div>
-
-
-        </div>
 
     </section>
 
     <!-- SCRIPT PERHITUNGAN -->
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('lab-form');
@@ -363,7 +494,6 @@
             const fatPctSpan = document.getElementById('result-fat-pct');
 
             const insightP = document.getElementById('result-insight');
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             function classifyBMI(bmi) {
                 if (bmi < 18.5) return 'Kurus';
@@ -373,8 +503,10 @@
             }
 
             function tujuanLabel(tujuan) {
-                if (tujuan === 'turun') return 'Defisit sekitar 15% dari TDEE untuk menurunkan berat badan.';
-                if (tujuan === 'naik') return 'Surplus sekitar 15% dari TDEE untuk menaikkan berat badan.';
+                if (tujuan === 'turun')
+                    return 'Defisit sekitar 15% dari TDEE untuk menurunkan berat badan.';
+                if (tujuan === 'naik')
+                    return 'Surplus sekitar 15% dari TDEE untuk menaikkan berat badan.';
                 return 'Kalori seimbang untuk mempertahankan berat badan.';
             }
 
@@ -400,59 +532,43 @@
                 };
             }
 
-            function generatePromptForGemini({
-                gender,
-                usia,
-                tb,
-                bb,
-                bmi,
-                bmiCat,
-                bmr,
-                tdee,
+            function buildSimpleInsight({
                 tujuan,
                 calTarget,
-                macroCfg,
-                carbG,
-                proteinG,
-                fatG
+                bmiCat
             }) {
-                const genderText = gender === 'male' ? 'laki-laki' : 'perempuan';
-                const tujuanText = tujuan === 'turun' ?
-                    'turun berat badan' :
-                    tujuan === 'naik' ?
-                    'naik berat badan' :
-                    'mempertahankan berat badan';
+                let opening = '';
 
-                return `
-Kamu adalah asisten gizi untuk aplikasi KaloriKita.
+                if (bmiCat === 'Kurus') {
+                    opening =
+                        'Berat badanmu saat ini masuk kategori kurus. Itu bukan berarti buruk, tapi kamu perlu ekstra perhatian pada asupan energi dan protein.';
+                } else if (bmiCat === 'Normal') {
+                    opening =
+                        'Berat badanmu saat ini berada di kategori normal. Ini modal yang bagus untuk menjaga kesehatan jangka panjang.';
+                } else if (bmiCat === 'Berlebih') {
+                    opening =
+                        'Berat badanmu masuk kategori berlebih. Dengan pola makan yang lebih teratur dan aktif bergerak, kamu bisa perlahan kembali ke rentang sehat.';
+                } else {
+                    opening =
+                        'Berat badanmu masuk kategori obesitas. Perubahan kecil tapi konsisten akan jauh lebih aman dan efektif daripada diet ekstrem.';
+                }
 
-Berikan insight singkat berdasarkan data pengguna berikut:
+                let goalText = '';
+                if (tujuan === 'turun') {
+                    goalText =
+                        `Kamu memilih tujuan menurunkan berat badan. Coba jaga asupan sekitar ${Math.round(calTarget)} kkal per hari dan fokus ke makanan tinggi protein dan berserat.`;
+                } else if (tujuan === 'naik') {
+                    goalText =
+                        `Kamu memilih tujuan menaikkan berat badan. Target sekitar ${Math.round(calTarget)} kkal per hari dengan sumber kalori dari karbo kompleks, protein cukup, dan lemak sehat.`;
+                } else {
+                    goalText =
+                        `Kamu ingin mempertahankan berat badan. Menjaga asupan sekitar ${Math.round(calTarget)} kkal per hari dengan pola makan seimbang sudah sangat baik.`;
+                }
 
-Gender: ${genderText}
-Usia: ${usia} tahun
-Tinggi badan: ${tb} cm
-Berat badan: ${bb} kg
+                const closing =
+                    'Ingat, ini baru gambaran angka awal. Untuk insight AI yang lebih personal dan bisa disimpan di akunmu, login ke KaloriKita dan gunakan KaloriLab versi penuh di dashboard.';
 
-BMI: ${bmi.toFixed(1)}
-Kategori BMI: ${bmiCat}
-
-BMR: ${Math.round(bmr)} kkal
-TDEE: ${Math.round(tdee)} kkal
-Tujuan: ${tujuanText}
-Kalori target: ${Math.round(calTarget)} kkal
-
-Makronutrien per hari (dari kalori target):
-- Karbohidrat: ${Math.round(carbG)} g (${macroCfg.carb}% kalori)
-- Protein: ${Math.round(proteinG)} g (${macroCfg.protein}% kalori)
-- Lemak: ${Math.round(fatG)} g (${macroCfg.fat}% kalori)
-
-Instruksi format jawaban:
-1. Paragraf 1: jelaskan kondisi pengguna (kategori BMI dan tujuan) dengan nada positif dan tidak menghakimi.
-2. Paragraf 2: gambarkan pola makan harian secara umum (misal 3x makan utama + 1–2 snack) berdasarkan kalori awal tersebut.
-3. Tambahkan 3 bullet point saran praktis yang sangat konkret (contoh jenis makanan, kebiasaan harian sederhana, dan tips konsisten).
-
-Gunakan bahasa Indonesia, maksimal sekitar 180 kata, ramah dan mudah dipahami, tanpa istilah medis rumit.
-        `.trim();
+                return `${opening} ${goalText} ${closing}`;
             }
 
             form.addEventListener('submit', (e) => {
@@ -542,59 +658,22 @@ Gunakan bahasa Indonesia, maksimal sekitar 180 kata, ramah dan mudah dipahami, t
                 formWrapper.classList.add('hidden');
                 resultWrapper.classList.remove('hidden');
 
-                // >>>> PANGGIL GEMINI UNTUK INSIGHT <<<<
-                insightP.textContent = 'Menyusun insight AI berdasarkan data kamu...';
-
-                const prompt = generatePromptForGemini({
-                    gender,
-                    usia,
-                    tb,
-                    bb,
-                    bmi,
-                    bmiCat,
-                    bmr,
-                    tdee,
+                // INSIGHT SEDERHANA (BUKAN AI)
+                const simpleInsight = buildSimpleInsight({
                     tujuan,
                     calTarget,
-                    macroCfg,
-                    carbG,
-                    proteinG,
-                    fatG
+                    bmiCat
                 });
+                insightP.textContent = simpleInsight;
 
-                fetch("{{ route('lab.insight') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            prompt
-                        })
-                    })
-
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.insight) {
-                            const fullInsight = data.insight;
-
-                            // Preview pendek tetap plain (biar line-clamp rapi)
-                            insightP.textContent = fullInsight;
-
-                            // Modal: pakai HTML yang sudah diformat
-                            const modalInsightEl = document.getElementById("modal-insight-content");
-                            modalInsightEl.innerHTML = formatInsightToHtml(fullInsight);
-
-                            document.getElementById("view-more-btn").classList.remove("hidden");
-                        } else {
-                            insightP.textContent = 'AI tidak mengembalikan insight.';
-                        }
-                    })
-
-                    .catch(() => {
-                        insightP.textContent = 'Maaf, terjadi kesalahan saat mengambil insight AI.';
+                // Scroll ke hasil
+                const labSection = document.getElementById('lab-section');
+                if (labSection && labSection.scrollIntoView) {
+                    labSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
                     });
+                }
             });
 
             function backToEdit() {
@@ -602,83 +681,11 @@ Gunakan bahasa Indonesia, maksimal sekitar 180 kata, ramah dan mudah dipahami, t
                 formWrapper.classList.remove('hidden');
             }
 
-            backEdit.addEventListener('click', backToEdit);
-            backEditMobile.addEventListener('click', backToEdit);
-        });
-
-        function formatInsightToHtml(text) {
-            if (!text) return '';
-
-            // Escape dasar supaya aman
-            let html = text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-
-            // Bold: **teks** -> <strong>teks</strong>
-            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-            // Bullet list: baris yang diawali "* " jadi <li>
-            const lines = html.split(/\r?\n/);
-            let inList = false;
-            let result = '';
-
-            for (let line of lines) {
-                const bulletMatch = line.match(/^\s*\*\s+(.*)/);
-
-                if (bulletMatch) {
-                    if (!inList) {
-                        inList = true;
-                        result += '<ul class="list-disc pl-5 space-y-1 mb-2">';
-                    }
-                    result += `<li>${bulletMatch[1]}</li>`;
-                } else {
-                    if (inList) {
-                        inList = false;
-                        result += '</ul>';
-                    }
-                    if (line.trim() !== '') {
-                        result += `<p class="mb-2">${line}</p>`;
-                    } else {
-                        // baris kosong -> jarak antar paragraf
-                        result += '<div class="mb-2"></div>';
-                    }
-                }
-            }
-
-            if (inList) {
-                result += '</ul>';
-            }
-
-            return result;
-        }
-
-
-        // ===== MODAL HANDLING =====
-        const viewMoreBtn = document.getElementById("view-more-btn");
-        const modal = document.getElementById("insight-modal");
-        const closeModal = document.getElementById("close-modal");
-        const closeModalBottom = document.getElementById("close-modal-bottom");
-
-        viewMoreBtn.addEventListener("click", () => {
-            modal.classList.remove("hidden");
-        });
-
-        closeModal.addEventListener("click", () => {
-            modal.classList.add("hidden");
-        });
-
-        closeModalBottom.addEventListener("click", () => {
-            modal.classList.add("hidden");
-        });
-
-        // klik area gelap (outside modal) untuk close
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) {
-                modal.classList.add("hidden");
-            }
+            if (backEdit) backEdit.addEventListener('click', backToEdit);
+            if (backEditMobile) backEditMobile.addEventListener('click', backToEdit);
         });
     </script>
+
 
 </body>
 

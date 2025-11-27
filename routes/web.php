@@ -5,8 +5,33 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LabController;
+use App\Http\Controllers\GoogleController;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
+use App\Http\Controllers\KaloriTrackerController;
+use App\Http\Controllers\ProfilDashboardController;
+
+
+Route::get('/kalori-tracker', [KaloriTrackerController::class, 'index'])
+    ->name('profil.kalori.tracker')
+    ->middleware('auth');
+
+Route::post('/kalori-tracker/entry', [KaloriTrackerController::class, 'storeEntry'])
+    ->name('kalori.tracker.entry.store')
+    ->middleware('auth');
+
+Route::post('/kalori-tracker/target', [KaloriTrackerController::class, 'updateTarget'])
+    ->name('kalori.tracker.target.update')
+    ->middleware('auth');
+
+Route::post('/kalori-tracker/entry/ai', [KaloriTrackerController::class, 'storeEntryAi'])
+    ->name('kalori.tracker.entry.ai')
+    ->middleware('auth');
+Route::post(
+    '/kalori-tracker/performance-insight',
+    [KaloriTrackerController::class, 'generatePerformanceInsight']
+)->name('kalori.tracker.insight');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -25,15 +50,20 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::get('/kalori-lab', function () {
-    return view('labkalori');
-});
+    return view('profil.kalorilab');
+})->name('kalori-lab');
 
 Route::post('/kalori-lab/insight', [LabController::class, 'insight'])
-     ->name('lab.insight');
+    ->name('lab.insight');
 
 Route::get('/menu', function () {
     return view('components.food-menu');
 });
+
+Route::get('/lab-kalori', function () {
+    return view('labkalori');
+})->name('lab.kalori');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -41,17 +71,13 @@ Route::get('/menu', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/profil', function () {
-    return view('profil.dashboard');
-})->name('profil.dashboard');
+Route::get('/profil', [ProfilDashboardController::class, 'index'])
+    ->name('profil.dashboard')
+    ->middleware('auth');
 
 Route::get('/myorder', function () {
     return view('profil.myorder');
 })->name('profil.myorder');
-
-Route::get('/kalori-tracker', function () {
-    return view('profil.kalori-tracker');
-})->name('profil.kalori.tracker');
 
 Route::post('/logout', function () {
     auth()->logout();
@@ -129,7 +155,6 @@ Route::get('/paket/{slug}', function ($slug) {
     return view('paket.detail', [
         'paket' => $pakets[$slug]
     ]);
-
 })->name('paket.detail');
 
 
@@ -155,35 +180,19 @@ Route::post('/forgot-password/reset', [AuthController::class, 'resetPassword'])
 
 /*
 |--------------------------------------------------------------------------
-| GOOGLE AUTH ROUTES (FINAL)
+| GOOGLE AUTH ROUTES (CLEAN VERSION)
 |--------------------------------------------------------------------------
 */
 
 // Redirect ke Google
-Route::get('/auth/google', function () {
-    return \Laravel\Socialite\Facades\Socialite::driver('google')->redirect();
-})->name('google.login');
+Route::get('/auth/google', [GoogleController::class, 'redirect'])
+    ->name('google.login');
 
 // Callback dari Google
-Route::get('/auth/google/callback', function () {
-    $googleUser = \Laravel\Socialite\Facades\Socialite::driver('google')->stateless()->user();
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])
+    ->name('google.callback');
 
-    $user = \App\Models\User::where('email', $googleUser->getEmail())->first();
-
-    if (!$user) {
-        $user = \App\Models\User::create([
-            'name'      => $googleUser->getName(),
-            'email'     => $googleUser->getEmail(),
-            'google_id' => $googleUser->getId(),
-            'password'  => bcrypt('google-login'), // dummy password
-        ]);
-    } elseif (!$user->google_id) {
-        $user->update([
-            'google_id' => $googleUser->getId(),
-        ]);
-    }
-
-    auth()->login($user);
-
-    return redirect()->route('profil.dashboard');
-});
+// Hubungkan akun Google ke akun manual (harus login)
+Route::get('/connect/google', [GoogleController::class, 'connect'])
+    ->middleware('auth')
+    ->name('google.connect');
