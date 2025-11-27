@@ -84,7 +84,6 @@ Route::post('/logout', function () {
     return redirect('/'); // kembali ke home
 })->name('logout');
 
-
 /*
 |--------------------------------------------------------------------------
 | PAKET ROUTES
@@ -157,7 +156,6 @@ Route::get('/paket/{slug}', function ($slug) {
     ]);
 })->name('paket.detail');
 
-
 /*
 |--------------------------------------------------------------------------
 | FORGOT PASSWORD – OTP (3 STEP DALAM 1 FILE)
@@ -177,7 +175,6 @@ Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyOtp'])
 Route::post('/forgot-password/reset', [AuthController::class, 'resetPassword'])
     ->name('password.reset');
 
-
 /*
 |--------------------------------------------------------------------------
 | GOOGLE AUTH ROUTES (CLEAN VERSION)
@@ -196,3 +193,40 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])
 Route::get('/connect/google', [GoogleController::class, 'connect'])
     ->middleware('auth')
     ->name('google.connect');
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN DASHBOARD ROUTES (PREFIX /admin)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('dashboard'); // memanggil sidebar-admin.blade.php di dalamnya
+    })->name('admin.dashboard');
+
+    Route::get('/pengguna', function () {
+        return view('pengguna');
+    })->name('admin.pengguna');
+
+    Route::get('/menu-paket', function () {
+        return view('menu-paket');
+    })->name('admin.menu-paket');
+
+    Route::get('/transaksi', function () {
+        return view('transaksi');
+    })->name('admin.transaksi');
+
+    Route::get('/testimoni', function () {
+        return view('testimoni');
+    })->name('admin.testimoni');
+
+    Route::get('/pengaturan', function () {
+        return view('pengaturan');
+    })->name('admin.pengaturan');
+
+    Route::get('/log-aktivitas', function () {
+        return view('log-aktivitas');
+    })->name('admin.log-aktivitas');
+});
