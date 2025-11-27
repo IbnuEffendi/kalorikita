@@ -1,4 +1,4 @@
-<aside class="w-64 bg-[#064e3b] text-white min-h-screen fixed left-0 top-0 py-6 px-4">
+<aside class="w-64 bg-green-800 text-white min-h-screen fixed left-0 top-0 py-6 px-4">
     <div class="text-center mb-8">
         <div class="w-20 h-20 bg-white/20 rounded-full mx-auto mb-3 flex items-center justify-center">
             <i class='bx bxs-user text-5xl'></i>
