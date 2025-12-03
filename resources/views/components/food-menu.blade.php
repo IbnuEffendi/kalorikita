@@ -30,22 +30,23 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-16 justify-items-center">
 
                 @foreach ($menus as $m)
-                <div class="bg-white rounded-3xl shadow-lg p-6 text-center relative w-full max-w-sm hover:shadow-xl hover:scale-[1.03] transition duration-300">
+                <div class="bg-white rounded-3xl shadow-lg p-6 text-center relative w-full max-w-sm hover:shadow-xl hover:scale-[1.03] transition duration-300 flex flex-col h-full">
 
-                    <!-- Gambar diperbesar -->
-                    <img src="{{ $m->gambar }}" 
-                        alt="{{ $m->nama_menu }}"
-                        class="w-52 h-52 object-cover mx-auto rounded-3xl shadow-lg card-img">
+                    <div class="flex-shrink-0">
+                        <img src="{{ $m->gambar }}" 
+                             alt="{{ $m->nama_menu }}"
+                             class="w-52 h-52 object-cover mx-auto rounded-3xl shadow-lg card-img">
+                    </div>
 
                     <h3 class="text-xl font-semibold text-[#155C2E] mt-8">
                         {{ $m->nama_menu }}
                     </h3>
 
-                    <p class="text-sm text-gray-600 mt-2 line-clamp-2 px-3">
+                    <p class="text-sm text-gray-600 mt-2 px-3 line-clamp-3">
                         {{ $m->deskripsi }}
                     </p>
 
-                    <div class="flex justify-center space-x-8 mt-6 text-green-700">
+                    <div class="flex justify-center space-x-8 mt-auto pt-6 text-green-700">
 
                         <div class="flex items-center space-x-1">
                             <i class="fas fa-fire text-[#F97316]"></i>
@@ -59,10 +60,11 @@
 
                     </div>
 
-                    <div class="flex justify-between items-center mt-6 px-4">
-                        <div class="flex items-center bg-[#155C2E] text-white rounded-full px-3 py-1 text-sm space-x-1">
-                            <i class="fas fa-star text-[#FBBF24]"></i>
-                            <span>4.5</span>
+                    <div class="flex justify-between items-center mt-6 px-4 pb-2">
+                        <div class="flex items-center text-white rounded-full px-3 py-1 text-sm 
+                            {{ str_contains(strtolower($m->tipe_makanan), 'non') ? 'bg-[#F97316]' : 'bg-[#155C2E]' }}">
+                            
+                            <span class="capitalize">{{ str_replace('_', ' ', $m->tipe_makanan) }}</span>
                         </div>
 
                         <button class="text-[#E63946] text-xl hover:scale-110 transition">
@@ -75,7 +77,7 @@
             </div>
 
             <div class="mt-14 flex justify-center text-white">
-                {{ $menus->links() }}
+                {{ $menus->links('components.pagination') }}
             </div>
 
         </div>
