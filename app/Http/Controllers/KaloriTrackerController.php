@@ -445,4 +445,56 @@ EOT;
 
         return response()->json(['insight' => $text]);
     }
+
+    public function storeEntry(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'eaten_at' => ['required', 'date'],
+            'meal'     => ['required', 'string', 'max:255'],
+            'category' => ['nullable', 'string', 'max:100'],
+            'calories' => ['required', 'numeric', 'min:0'],
+            'carbs'    => ['nullable', 'numeric', 'min:0'],
+            'protein'  => ['nullable', 'numeric', 'min:0'],
+            'fat'      => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        CalorieEntry::create([
+            'user_id'  => $user->id,
+            'eaten_at' => $validated['eaten_at'],
+            'meal'     => $validated['meal'],
+            'category' => $validated['category'] ?? null,
+            'calories' => $validated['calories'],
+            'carbs'    => $validated['carbs']    ?? 0,
+            'protein'  => $validated['protein']  ?? 0,
+            'fat'      => $validated['fat']      ?? 0,
+        ]);
+
+        return redirect()
+            ->route('profil.kalori.tracker')
+            ->with('success', 'Entri kalori berhasil disimpan.');
+    }
+
+    public function updateTarget(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'kalori_target'  => ['required', 'integer', 'min:0'],
+            'karbo_target'   => ['nullable', 'integer', 'min:0'],
+            'protein_target' => ['nullable', 'integer', 'min:0'],
+            'lemak_target'   => ['nullable', 'integer', 'min:0'],
+            'goal'           => ['nullable', 'string', 'in:weightloss,maintain,bulking'],
+        ]);
+
+        UserTarget::updateOrCreate(
+            ['user_id' => $user->id],
+            $validated
+        );
+
+        return redirect()
+            ->route('profil.kalori.tracker')
+            ->with('success', 'Target kalori berhasil diperbarui.');
+    }
 }
