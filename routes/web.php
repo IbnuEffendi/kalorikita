@@ -10,6 +10,7 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use App\Http\Controllers\KaloriTrackerController;
 use App\Http\Controllers\ProfilDashboardController;
+use App\Http\Controllers\MenuController;
 
 
 Route::get('/kalori-tracker', [KaloriTrackerController::class, 'index'])
@@ -56,9 +57,7 @@ Route::get('/kalori-lab', function () {
 Route::post('/kalori-lab/insight', [LabController::class, 'insight'])
     ->name('lab.insight');
 
-Route::get('/menu', function () {
-    return view('components.food-menu');
-});
+Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
 
 Route::get('/lab-kalori', function () {
     return view('labkalori');

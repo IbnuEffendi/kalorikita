@@ -145,7 +145,7 @@ class MenuSeeder extends Seeder
             // 12
             [
                 'nama_menu'   => 'Smoothie Pisang Kacang',
-                'deskripsi'   => 'Minuman tinggi energi untuk sarapan cepat.',
+                'deskripsi'   => 'Makanan tinggi energi untuk sarapan cepat.',
                 'kategori'    => 'snack',
                 'tipe_makanan'=> 'vegan',
                 'kalori'      => 250,
