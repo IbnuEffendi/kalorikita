@@ -82,7 +82,7 @@
                 </div>
                 {{-- WhatsApp --}}
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">WhatsApp</label>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Nomor Telepon</label>
                     <input type="text" value="{{ $data['whatsapp'] }}" readonly class="w-full bg-gray-100 border border-gray-200 rounded-lg p-2.5 text-gray-600 text-sm focus:outline-none cursor-not-allowed">
                 </div>
                 {{-- Alamat --}}
