@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Http\Controllers\KaloriTrackerController;
 use App\Http\Controllers\ProfilDashboardController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\PaketController;
 
 
 Route::get('/kalori-tracker', [KaloriTrackerController::class, 'index'])
@@ -89,11 +90,11 @@ Route::post('/logout', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::view('/paket', 'paket.list')->name('paket.list');
+Route::get('/paket', [PaketController::class, 'index'])->name('paket.list');
 
-Route::get('/paket/checkout/{plan?}', function ($plan = null) {
-    return view('paket.checkout', ['plan' => $plan]);
-})->name('paket.checkout');
+Route::post('/checkout', [PaketController::class, 'checkout'])->name('paket.checkout');
+
+Route::post('/payment', [PaketController::class, 'payment'])->name('paket.payment');
 
 Route::get('/proses-beli', [OrderController::class, 'showForm'])->name('proses.beli');
 Route::post('/proses-beli', [OrderController::class, 'store'])->name('proses.beli.store');
@@ -108,52 +109,7 @@ Route::get('/pesanan/success', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/paket/{slug}', function ($slug) {
-
-    $pakets = [
-        'pencoba' => [
-            'nama' => 'Paket Pencoba',
-            'tag' => 'Starter Pack',
-            'deskripsi' => 'Cocok untuk kamu yang baru mau cobain katering sehat...',
-            'kalori' => '1200-1400',
-            'protein' => 'Medium',
-            'box' => '10',
-            'harga' => '300000',
-            'harga_coret' => '350000',
-            'gambar' => 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
-        ],
-        'maintain' => [
-            'nama' => 'Paket Maintain',
-            'tag' => 'Best Value',
-            'deskripsi' => 'Buat kamu yang ingin menjaga berat badan ideal...',
-            'kalori' => '1600-1800',
-            'protein' => 'Balanced',
-            'box' => '12',
-            'harga' => '350000',
-            'harga_coret' => '450000',
-            'gambar' => 'https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg?auto=compress&cs=tinysrgb&w=800',
-        ],
-        'weightloss' => [
-            'nama' => 'Paket Weight Loss',
-            'tag' => 'Popular',
-            'deskripsi' => 'Program diet defisit kalori untuk turunkan berat badan...',
-            'kalori' => '1100-1300',
-            'protein' => 'High',
-            'box' => '10',
-            'harga' => '400000',
-            'harga_coret' => '500000',
-            'gambar' => 'https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=800',
-        ],
-    ];
-
-    if (!array_key_exists($slug, $pakets)) {
-        abort(404);
-    }
-
-    return view('paket.detail', [
-        'paket' => $pakets[$slug]
-    ]);
-})->name('paket.detail');
+Route::get('/paket/{slug}', [PaketController::class, 'show'])->name('paket.detail');
 
 /*
 |--------------------------------------------------------------------------
