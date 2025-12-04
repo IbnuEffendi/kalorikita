@@ -26,7 +26,7 @@
     </style>
 </head>
 
-<body class="bg-green-900/95">
+<body class="bg-green-700/60">
 
     {{-- NAVBAR --}}
     <x-navbar></x-navbar>

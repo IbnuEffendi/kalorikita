@@ -15,7 +15,7 @@
     </style>
 </head>
 
-<body class="bg-green-900/95">
+<body class="bg-green-700/60">
 
     {{-- NAVBAR --}}
     <x-navbar></x-navbar>
@@ -1017,22 +1017,36 @@ Sarapan tadi: nasi putih 1 piring (±200 g), ayam goreng 1 potong paha, sambal s
             }
         }
 
-        // default: manual
-        // default: manual
-        setMode('manual');
-
-        // kalau ada suggestion dari AI, buka modal dan tampilkan mode manual dengan prefill
+        // DEFAULT MODE
         @if (!empty($aiSuggestion))
+            // Kalau baru saja datang dari analisis AI:
+            // buka modal dan tampilkan mode manual dengan data terisi
+            setMode('manual');
             entryModal.classList.remove('hidden');
+        @else
+            // Kalau user baru klik "Tambah Catatan", arahkan dulu ke Input via AI
+            setMode('ai');
         @endif
+
 
 
         if (openEntry) {
             openEntry.addEventListener('click', () => {
-                setMode('manual');
+                // Saat user klik "Tambah Catatan Makan", arahkan ke mode AI dulu
+                setMode('ai');
                 showModal();
             });
         }
+
+        // Untuk tombol "Tambah Catatan Pertama"
+        const openEntryEmpty = document.getElementById('btn-open-entry-modal-empty');
+        if (openEntryEmpty) {
+            openEntryEmpty.addEventListener('click', () => {
+                setMode('ai');
+                showModal();
+            });
+        }
+
 
         closeEntry.addEventListener('click', hideModal);
         if (cancelEntryManual) cancelEntryManual.addEventListener('click', hideModal);

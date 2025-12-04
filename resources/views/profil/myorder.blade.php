@@ -13,7 +13,7 @@
     </style>
 </head>
 
-<body class="bg-green-900/95 text-white">
+<body class="bg-green-700/60">
 
     {{-- NAVBAR UTAMA --}}
     <x-navbar></x-navbar>
