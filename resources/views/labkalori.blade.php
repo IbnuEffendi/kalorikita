@@ -33,7 +33,7 @@
     <x-navbar></x-navbar>
 
     <!-- ISI HALAMAN LAB KALORI -->
-    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-green-900">
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-green-700/90">
         <!-- Bagian 1: Hero / Judul Halaman -->
         <x-hitung-lab></x-hitung-lab>
     </main>
