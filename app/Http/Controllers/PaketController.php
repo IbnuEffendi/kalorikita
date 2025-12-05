@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PaketCategory;
 use App\Models\PaketOption;
+use Midtrans\Config;
+use Midtrans\Snap;
+
 
 class PaketController extends Controller
 {
@@ -53,20 +56,53 @@ class PaketController extends Controller
      */
     public function payment(Request $request)
     {
-        // 1. Ambil semua data inputan user (Nama, Alamat, WA, Catatan)
+        // Validasi basic
+        $request->validate([
+            'paket_option_id' => 'required|exists:paket_options,id',
+            'nama'            => 'required|string',
+            'whatsapp'        => 'required|string',
+            'alamat'          => 'required|string',
+            'catatan'         => 'nullable|string',
+        ]);
+
         $data = $request->all();
 
-        // 2. Validasi ID Paket
-        if (!$request->has('paket_option_id')) {
-            return redirect()->route('paket.index');
-        }
-
-        // 3. Ambil ulang data paket dari database (untuk ditampilkan di Ringkasan)
+        // Ambil data paket
         $paketOption = PaketOption::with('category')->findOrFail($request->paket_option_id);
         $totalBox = $paketOption->durasi_hari * 2;
 
-        // 4. Kirim data user ($data) dan data paket ke halaman Payment
-        // Pastikan file view ada di: resources/views/paket/payment.blade.php
-        return view('paket.payment', compact('data', 'paketOption', 'totalBox'));
+        // --- MIDTRANS CONFIG ---
+        Config::$serverKey    = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized  = true;
+        Config::$is3ds        = true;
+
+        // Bikin order_id unik
+        $orderId = 'KK-' . time() . '-' . $paketOption->id;
+
+        $params = [
+            'transaction_details' => [
+                'order_id'     => $orderId,
+                'gross_amount' => $paketOption->harga,
+            ],
+            'customer_details' => [
+                'first_name' => $request->nama,
+                'phone'      => $request->whatsapp,
+            ],
+            'item_details' => [
+                [
+                    'id'       => $paketOption->id,
+                    'price'    => $paketOption->harga,
+                    'quantity' => 1,
+                    'name'     => 'Paket ' . $paketOption->category->nama_kategori,
+                ],
+            ],
+        ];
+
+        // Ambil Snap Token untuk popup
+        $snapToken = Snap::getSnapToken($params);
+
+        // kirim juga snapToken ke view
+        return view('paket.payment', compact('data', 'paketOption', 'totalBox', 'snapToken'));
     }
 }
