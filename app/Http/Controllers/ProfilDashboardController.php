@@ -10,7 +10,18 @@ class ProfilDashboardController extends Controller
 {
     public function index()
     {
-        $user  = Auth::user();
+        $user = Auth::user();
+
+        // 👇 Kalau belum login, lempar ke login (jaga-jaga)
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // 👇 Kalau role = admin, arahkan ke dashboard admin
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
         $today = now()->toDateString();
 
         // =========================
