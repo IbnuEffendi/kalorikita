@@ -10,9 +10,10 @@ class ProfilController extends Controller
 {
     public function dashboard()
     {
-        $user = auth()->user();
+         $user = Auth::user();
 
         return view('profil.dashboard', [
+            'user' => $user,
             'activePlan' => [
                 'name' => 'Paket Maintain',
                 'slug' => 'maintain',

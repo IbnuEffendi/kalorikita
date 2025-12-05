@@ -43,13 +43,21 @@ Route::post(
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 
+// FORM REGISTER (GET)
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// PROSES REGISTER (POST)
+Route::post('/register', [AuthController::class, 'register'])
+    ->name('register.store');
+
+// FORM LOGIN (GET)
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+
+// PROSES LOGIN (POST)
+Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+
 
 Route::get('/kalori-lab', function () {
     return view('profil.kalorilab');
