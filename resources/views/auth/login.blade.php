@@ -72,7 +72,7 @@
                     Masuk
                 </button>
 
-                <a href="{{ route('password.forgot') }}"
+                <a href="{{ route('password.request') }}"
                     class="text-left text-sm text-gray-800 font-semibold hover:underline">
                     <span class="block mt-2">Lupa Kata Sandi?</span>
                 </a>

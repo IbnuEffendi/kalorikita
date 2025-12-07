@@ -121,22 +121,21 @@ Route::get('/paket/{slug}', [PaketController::class, 'show'])->name('paket.detai
 
 /*
 |--------------------------------------------------------------------------
-| FORGOT PASSWORD – OTP (3 STEP DALAM 1 FILE)
+| FORGOT PASSWORD (DIPERBAIKI)
 |--------------------------------------------------------------------------
 */
 
-Route::get('/forgot-password', function () {
-    return view('auth.forgot-password');
-})->name('password.forgot');
+// 1. Form Isi Email
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
 
-Route::post('/forgot-password/send-otp', [AuthController::class, 'sendOtp'])
-    ->name('password.sendOtp');
+// 2. Proses Kirim Link Email
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 
-Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyOtp'])
-    ->name('password.verifyOtp');
+// 3. Form Reset Password (Link dari Email)
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 
-Route::post('/forgot-password/reset', [AuthController::class, 'resetPassword'])
-    ->name('password.reset');
+// 4. Proses Update Password Baru
+Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
 
 /*
 |--------------------------------------------------------------------------
