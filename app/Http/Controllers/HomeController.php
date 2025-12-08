@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Menu;
+use App\Models\PaketCategory; // <--- 1. Pastikan Model ini dipanggil!
 
 class HomeController extends Controller
 {
     public function home()
     {
-        // Ambil 4 menu acak untuk "Menu Mingguan"
+        // 1. Ambil Menu (Kode lama)
         $menuMingguan = Menu::inRandomOrder()->take(8)->get();
 
-        // Nanti kalau kamu mau tambahkan data lain (misal promo, artikel, dll), bisa ditambah di sini
-        return view('home', compact('menuMingguan'));
+        // 2. Ambil Paket (INI YANG KEMARIN HILANG/BELUM ADA)
+        $packets = PaketCategory::all(); 
+
+        // 3. Kirim DUA variabel ke view ('menuMingguan' DAN 'packets')
+        return view('home', compact('menuMingguan', 'packets'));
     }
 }
