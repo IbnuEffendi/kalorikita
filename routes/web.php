@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request; 
+use Illuminate\Support\Facades\Storage; // Untuk hapus foto lama
+use Illuminate\Support\Str;             // Untuk cek URL foto
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
@@ -12,7 +16,19 @@ use App\Http\Controllers\KaloriTrackerController;
 use App\Http\Controllers\ProfilDashboardController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PaketController;
+use App\Http\Controllers\MenuScheduleController;
 
+// --- MODEL DATABASE ---
+use App\Models\PaketCategory;
+use App\Models\Menu;
+use App\Models\MenuSchedule;
+use App\Models\Order; // [WAJIB] Agar Admin bisa ambil data pesanan
+
+/*
+|--------------------------------------------------------------------------
+| KALORI TRACKER ROUTES
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/kalori-tracker', [KaloriTrackerController::class, 'index'])
     ->name('profil.kalori.tracker')
@@ -29,10 +45,9 @@ Route::post('/kalori-tracker/target', [KaloriTrackerController::class, 'updateTa
 Route::post('/kalori-tracker/entry/ai', [KaloriTrackerController::class, 'storeEntryAi'])
     ->name('kalori.tracker.entry.ai')
     ->middleware('auth');
-Route::post(
-    '/kalori-tracker/performance-insight',
-    [KaloriTrackerController::class, 'generatePerformanceInsight']
-)->name('kalori.tracker.insight');
+
+Route::post('/kalori-tracker/performance-insight', [KaloriTrackerController::class, 'generatePerformanceInsight'])
+    ->name('kalori.tracker.insight');
 
 
 /*
@@ -43,28 +58,30 @@ Route::post(
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 
-// FORM REGISTER (GET)
+// REGISTER
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 
-// PROSES REGISTER (POST)
-Route::post('/register', [AuthController::class, 'register'])
-    ->name('register.store');
+Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 
-// FORM LOGIN (GET)
+// LOGIN
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-
-// PROSES LOGIN (POST)
 Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 
+// LOGOUT
+Route::post('/logout', function () {
+    auth()->logout();
+    return redirect('/'); 
+})->name('logout');
 
+
+// HALAMAN LAIN
 Route::get('/kalori-lab', function () {
     return view('profil.kalorilab');
 })->name('kalori-lab');
 
-Route::post('/kalori-lab/insight', [LabController::class, 'insight'])
-    ->name('lab.insight');
+Route::post('/kalori-lab/insight', [LabController::class, 'insight'])->name('lab.insight');
 
 Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
 
@@ -87,14 +104,10 @@ Route::get('/myorder', function () {
     return view('profil.myorder');
 })->name('profil.myorder');
 
-Route::post('/logout', function () {
-    auth()->logout();
-    return redirect('/'); // kembali ke home
-})->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| PAKET ROUTES
+| PAKET ROUTES (USER SIDE)
 |--------------------------------------------------------------------------
 */
 
@@ -111,50 +124,40 @@ Route::get('/pesanan/success', function () {
     return view('paket.success');
 })->name('pesanan.success');
 
-/*
-|--------------------------------------------------------------------------
-| DETAIL PAKET DINAMIS
-|--------------------------------------------------------------------------
-*/
-
 Route::get('/paket/{slug}', [PaketController::class, 'show'])->name('paket.detail');
 
+
 /*
 |--------------------------------------------------------------------------
-| FORGOT PASSWORD (DIPERBAIKI)
+| FORGOT PASSWORD
 |--------------------------------------------------------------------------
 */
 
-// 1. Form Isi Email
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-
-// 2. Proses Kirim Link Email
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
-
-// 3. Form Reset Password (Link dari Email)
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
-
-// 4. Proses Update Password Baru
 Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
 
+
 /*
 |--------------------------------------------------------------------------
-| GOOGLE AUTH ROUTES (CLEAN VERSION)
+| GOOGLE AUTH ROUTES
 |--------------------------------------------------------------------------
 */
 
-// Redirect ke Google
-Route::get('/auth/google', [GoogleController::class, 'redirect'])
-    ->name('google.login');
+Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+Route::get('/connect/google', [GoogleController::class, 'connect'])->middleware('auth')->name('google.connect');
 
-// Callback dari Google
-Route::get('/auth/google/callback', [GoogleController::class, 'callback'])
-    ->name('google.callback');
 
-// Hubungkan akun Google ke akun manual (harus login)
-Route::get('/connect/google', [GoogleController::class, 'connect'])
-    ->middleware('auth')
-    ->name('google.connect');
+/*
+|--------------------------------------------------------------------------
+| MIDTRANS CALLBACK (WEBHOOK)
+|--------------------------------------------------------------------------
+*/
+// [PENTING] Route ini harus di luar middleware auth agar Midtrans bisa akses
+Route::post('/midtrans/callback', [OrderController::class, 'callback']);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -162,168 +165,233 @@ Route::get('/connect/google', [GoogleController::class, 'connect'])
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\Admin\AdminDashboardController;
-// pakai controller nanti, tapi sementara bisa juga pakai closure
-
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware('auth')
+    ->middleware('auth') // Pastikan hanya yang login bisa akses
     ->group(function () {
 
-        // DASHBOARD ADMIN
+        // ==========================================================
+        // 1. DASHBOARD ADMIN (DATA REAL)
+        // ==========================================================
         Route::get('/dashboard', function () {
-            // view: resources/views/admin/dashboard.blade.php
-            return view('admin.dashboard');
+            
+            $today = now()->toDateString();
+
+            // 1. Hitung Statistik Real-time
+            $statsToday = [
+                'orders_today'    => Order::whereDate('created_at', $today)->count(),
+                'revenue_today'   => Order::whereDate('created_at', $today)->where('status', 'aktif')->sum('total_harga'),
+                'new_users_today' => User::whereDate('created_at', $today)->count(),
+                'active_plans'    => Order::where('status', 'aktif')->where('end_date', '>=', $today)->count(),
+            ];
+
+            // 2. Ambil 5 Pesanan Terbaru
+            $latestOrders = Order::with(['user', 'paketCategory'])
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(function($order) {
+                    return [
+                        'id'        => $order->id,
+                        'user_name' => $order->user->name ?? 'Guest',
+                        'plan_name' => $order->paketCategory->nama_kategori ?? '-',
+                        'total'     => $order->total_harga,
+                        'status'    => ucfirst($order->status),
+                        'created_at'=> $order->created_at->diffForHumans(), 
+                    ];
+                });
+
+            // 3. Ambil 5 User Terbaru
+            $latestUsers = User::latest()->take(5)->get()->map(function($u) {
+                // Cari paket aktif user ini
+                $activeOrder = Order::where('user_id', $u->id)
+                                ->where('status', 'aktif')
+                                ->where('end_date', '>=', now())
+                                ->with('paketCategory')
+                                ->first();
+                return [
+                    'name'        => $u->name,
+                    'email'       => $u->email,
+                    'joined_at'   => $u->created_at->format('d M Y'),
+                    'active_plan' => $activeOrder ? $activeOrder->paketCategory->nama_kategori : null,
+                ];
+            });
+
+            // Data Dummy (Fallback)
+            $systemNotifications = [];
+            $topPackages = [];
+            $aiStats = ['requests_today' => 0];
+
+            return view('admin.dashboard', compact('statsToday', 'latestOrders', 'latestUsers', 'systemNotifications', 'topPackages', 'aiStats'));
         })->name('dashboard');
 
-        // ORDERS (LIST)
+
+        // ==========================================================
+        // 2. MANAJEMEN PAKET (TAB 1)
+        // ==========================================================
+
+        Route::get('/paket', fn() => view('admin.paket.index'))->name('paket.index');
+
+        // CRUD Paket
+        Route::get('/paket/create', fn() => view('admin.paket.create'))->name('paket.create');
+        Route::post('/paket/store', [PaketController::class, 'store'])->name('paket.store');
+        
+        // Halaman Detail
+        Route::get('/paket/{id}', function ($id) {
+            $package = PaketCategory::findOrFail($id);
+            $menus = Menu::all();
+            $schedules = MenuSchedule::where('paket_category_id', $id)->orderBy('schedule_date', 'asc')->get();
+            return view('admin.paket.show', compact('package', 'menus', 'schedules'));
+        })->name('paket.show');
+
+        // Halaman Edit
+        Route::get('/paket/{id}/edit', function($id) {
+            $package = PaketCategory::findOrFail($id);
+            return view('admin.paket.edit', compact('package'));
+        })->name('paket.edit');
+        
+        // Update & Hapus
+        Route::put('/paket/{id}', [PaketController::class, 'update'])->name('paket.update');
+        Route::delete('/paket/{id}', [PaketController::class, 'destroy'])->name('paket.destroy');
+
+        // CRUD Opsi Durasi (Anak)
+        Route::post('/paket-options/store', [PaketController::class, 'storeOption'])->name('paket.options.store');
+        Route::delete('/paket-options/{id}', [PaketController::class, 'destroyOption'])->name('paket.options.destroy');
+
+
+        // ==========================================================
+        // 3. KELOLA MENU (TAB 2)
+        // ==========================================================
+        Route::get('/paket-menus', function() {
+             $menus = Menu::orderBy('created_at', 'desc')->get();
+             return view('admin.paket.menus', compact('menus'));
+        })->name('paket.menus');
+
+        Route::post('/paket-menus/store', function(Request $request) {
+            $validated = $request->validate([
+                'nama_menu' => 'required', 'kategori' => 'required', 'tipe_makanan' => 'required',
+                'kalori' => 'required', 'protein' => 'required', 'karbohidrat' => 'required', 'lemak' => 'required',
+                'gambar' => 'nullable|image'
+            ]);
+            $path = $request->hasFile('gambar') ? $request->file('gambar')->store('menus', 'public') : null;
+            Menu::create(array_merge($validated, ['gambar' => $path, 'deskripsi' => $request->deskripsi]));
+            return redirect()->back()->with('success', 'Menu berhasil ditambahkan!');
+        })->name('menus.store');
+
+        Route::get('/paket-menus/{id}/edit', function($id) {
+            $menu = Menu::findOrFail($id);
+            return view('admin.paket.edit-menu', compact('menu'));
+        })->name('menus.edit');
+        
+        Route::put('/paket-menus/{id}', function(Request $request, $id) {
+            $menu = Menu::findOrFail($id);
+            $menu->update($request->except(['gambar']));
+            if ($request->hasFile('gambar')) {
+                $menu->update(['gambar' => $request->file('gambar')->store('menus', 'public')]);
+            }
+            return redirect()->route('admin.paket.menus')->with('success', 'Menu berhasil diperbarui!');
+        })->name('menus.update');
+
+        Route::delete('/paket-menus/{id}', function($id) {
+            $menu = Menu::findOrFail($id);
+            if ($menu->gambar && !Str::startsWith($menu->gambar, 'http')) {
+                Storage::disk('public')->delete($menu->gambar);
+            }
+            $menu->delete();
+            return redirect()->back()->with('success', 'Menu berhasil dihapus!');
+        })->name('menus.destroy');
+
+
+        // ==========================================================
+        // 4. KELOLA BATCH (TAB 3)
+        // ==========================================================
+        Route::get('/paket-jadwal', function() {
+            $packets = PaketCategory::all(); 
+            $menus   = Menu::all();          
+            $schedules = MenuSchedule::with(['paketCategory', 'lunchMenu', 'dinnerMenu'])
+                            ->orderBy('schedule_date', 'desc')
+                            ->get();
+            return view('admin.paket.schedules', compact('packets', 'menus', 'schedules'));
+        })->name('paket.schedules');
+
+        // Simpan
+        Route::post('/jadwal-menu/store', [MenuScheduleController::class, 'store'])->name('paket.schedules.store');
+        
+        // [FITUR EDIT JADWAL - HALAMAN TERPISAH]
+        Route::get('/jadwal-menu/{id}/edit', [MenuScheduleController::class, 'edit'])->name('paket.schedules.edit');
+        Route::put('/jadwal-menu/{id}', [MenuScheduleController::class, 'update'])->name('paket.schedules.update');
+        
+        // Hapus
+        Route::delete('/jadwal-menu/{id}', [MenuScheduleController::class, 'destroy'])->name('paket.schedules.destroy');
+
+
+        // ==========================================================
+        // 5. FITUR ADMIN LAINNYA (ORDERS, USERS, REPORTS)
+        // ==========================================================
+
+        // --- KELOLA PESANAN (DATA REAL) ---
         Route::get('/orders', function () {
-            $orders = []; // atau isi dummy kalau mau
+            // Ambil data DB
+            $rawOrders = Order::with(['user', 'paketCategory', 'paketOption'])
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+            // Transformasi Data agar sesuai dengan view kamu (Array Style)
+            $orders = $rawOrders->map(function($order) {
+                return [
+                    'id'         => $order->id,
+                    'code'       => $order->order_code,
+                    'user_name'  => $order->user->name ?? 'Guest',
+                    'user_email' => $order->user->email ?? '-',
+                    'plan_name'  => $order->paketCategory->nama_kategori ?? '-',
+                    'total'      => $order->total_harga,
+                    'status'     => $order->status, // 'pending', 'aktif'
+                    'date'       => $order->created_at->format('Y-m-d H:i'),
+                    'total_hari' => $order->total_hari,
+                    'periode'    => $order->paketOption->periode ?? '-'
+                ];
+            });
 
             return view('admin.orders.index', compact('orders'));
         })->name('orders.index');
 
         Route::get('/orders/{id}', function ($id) {
-            $order = [
-                'id'            => $id,
-                'code'          => 'ORD-' . str_pad($id, 5, '0', STR_PAD_LEFT),
-                'user_name'     => 'Contoh Pengguna',
-                'user_email'    => 'user@example.com',
-                'user_phone'    => '08xxxxxxxxxx',
-                'plan_name'     => 'Paket Maintain 7 Hari',
-                'plan_slug'     => 'maintain-7',
-                'total'         => 300000,
-                'status'        => 'pending',
-                'date'          => now()->format('Y-m-d H:i'),
-                'notes'         => 'Tanpa cabe, kirim sekitar jam 12 siang.',
-                'address'       => 'Jl. Contoh No. 123, Denpasar',
-                'payment_method' => 'Transfer Bank',
-            ];
-
-            $items = [
-                ['name' => 'Menu Hari 1 - Siang', 'qty' => 1, 'price' => 45000],
-                ['name' => 'Menu Hari 2 - Siang', 'qty' => 1, 'price' => 45000],
-            ];
-
-            return view('admin.orders.show', compact('order', 'items'));
+            // Placeholder Detail Order
+            return view('admin.orders.show', ['order' => [], 'items' => []]);
         })->name('orders.show');
 
-        // PAKET KATERING
-        Route::get('/paket', fn() => view('admin.paket.index'))->name('paket.index');
-        Route::get('/paket/create', fn() => view('admin.paket.create'))->name('paket.create');
-        Route::get('/paket/{id}', function ($id) {
-            // nanti ganti ke controller yang ambil data dari DB
-            $package = []; // query paket
-            $menus   = []; // query menu-menu
 
-            return view('admin.paket.show', compact('package', 'menus'));
-        })->name('paket.show');
-
-        Route::get('/paket/{id}/edit', fn($id) => view('admin.paket.edit'))->name('paket.edit');;
-
-        // FORM BUAT / EDIT PAKET (CREATE)
-        Route::get('/paket/create', function () {
-            // nanti bisa diganti controller beneran, sekarang pakai view sederhana dulu
-            return view('admin.paket.create');
-        })->name('paket.create');
-
-
-        // DATA PENGGUNA
+        // --- DATA PENGGUNA ---
         Route::get('/users', function () {
-            // view: resources/views/admin/users/index.blade.php
             return view('admin.users.index');
         })->name('users.index');
 
         Route::get('/users/{id}', function ($id) {
             $user = User::findOrFail($id);
-
-            // contoh stats dummy (nanti bisa diisi dari tabel orders)
-            $stats = [
-                'orders_count' => 0,
-                'orders_total' => 0,
-                'last_order_at' => null,
-            ];
-
-            return view('admin.users.show', [
-                'userDetail' => $user,
-                'stats'      => $stats,
-            ]);
+            $stats = ['orders_count' => 0, 'orders_total' => 0, 'last_order_at' => null];
+            return view('admin.users.show', ['userDetail' => $user, 'stats' => $stats]);
         })->name('users.show');
 
 
-        // LAPORAN
+        // --- LAPORAN ---
         Route::get('/reports', function () {
-            // view: resources/views/admin/reports/index.blade.php
             return view('admin.reports.index');
         })->name('reports.index');
 
-
-
         Route::get('/reports/{date}', function ($date) {
-            // nanti bisa parse date dan query ke orders
-            $report = [
-                'title'         => 'Laporan ' . \Carbon\Carbon::parse($date)->translatedFormat('d F Y'),
-                'period_label'  => \Carbon\Carbon::parse($date)->translatedFormat('d F Y'),
-                'date'          => $date,
-                'income'        => 1150000,
-                'orders'        => 10,
-                'best_package'  => 'Paket Defisit 14 Hari',
-                'avg_per_order' => 115000,
-            ];
-
-            $orders = [
-                [
-                    'id'         => 1,
-                    'code'       => 'ORD-20251205-001',
-                    'user_name'  => 'Pengguna Contoh',
-                    'plan_name'  => 'Paket Defisit 14 Hari',
-                    'status'     => 'success',
-                    'total'      => 150000,
-                    'created_at' => '2025-12-05 09:30:00',
-                ],
-            ];
-
-            return view('admin.reports.show', compact('report', 'orders'));
+            // Dummy report data
+            $report = ['title' => 'Laporan', 'income' => 0, 'orders' => 0, 'date' => $date];
+            return view('admin.reports.show', ['report' => $report, 'orders' => []]);
         })->name('reports.show');
 
 
-        // LOG / STATISTIK AI (KaloriLab)
+        // --- LOG AI ---
         Route::get('/ai/ai-logs', function () {
-            $logs = []; // nanti isi dari DB (UserTarget / KaloriLog)
-            return view('admin.ai.logs', compact('logs'));
+            return view('admin.ai.logs', ['logs' => []]);
         })->name('ai.logs');
 
         Route::get('/ai/ai-logs/{id}', function ($id) {
-            // sementara dummy, nanti pakai model beneran
-            $log = [
-                'id'             => $id,
-                'user_id'        => 1,
-                'user_name'      => 'Pengguna Contoh',
-                'user_email'     => 'user@example.com',
-                'user_phone'     => '08xxxx',
-                'gender'         => 'L',
-                'age'            => 18,
-                'height'         => 160,
-                'weight'         => 45,
-                'activity_level' => 'Sedang',
-                'goal'           => 'defisit',
-                'bmi'            => 17.6,
-                'bmr'            => 1400,
-                'calorie_target' => 2200,
-                'protein_target' => 110,
-                'carb_target'    => 280,
-                'fat_target'     => 60,
-                'status'         => 'success',
-                'error_message'  => null,
-                'model'          => 'gemini-2.0-flash',
-                'tokens_input'   => 800,
-                'tokens_output'  => 450,
-                'insight'        => "Contoh insight dari AI...\n\n- Poin 1\n- Poin 2",
-                'created_at'     => now()->subMinutes(10),
-                'updated_at'     => now()->subMinutes(9),
-                'raw_payload'    => null,
-            ];
-
-            return view('admin.ai.show', compact('log'));
+            // Dummy log data
+            return view('admin.ai.show', ['log' => []]);
         })->name('ai.logs.show');
     });
