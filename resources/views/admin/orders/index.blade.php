@@ -8,348 +8,233 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
-        body {
-            font-family: 'Instrument Sans', sans-serif;
+        body { font-family: 'Instrument Sans', sans-serif; }
+        .scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scroll-thin::-webkit-scrollbar-thumb { background-color: rgba(34, 197, 94, 0.7); border-radius: 999px; }
+        
+        /* Icon select & date fix for dark theme */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
         }
-
-        /* Scrollbar halus di tabel */
-        .scroll-thin::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        .scroll-thin::-webkit-scrollbar-thumb {
-            background-color: rgba(34, 197, 94, 0.7);
-            border-radius: 999px;
-        }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
     </style>
 </head>
 
-<body class="bg-green-700/60">
+<body class="bg-green-700/60 min-h-screen">
 
-    {{-- NAVBAR UTAMA --}}
     <x-navbar></x-navbar>
 
     @php
         $user = auth()->user();
-
-        // Jika controller belum mengirim $orders, pakai dummy kosong
-        /** @var array $orders */
-        $orders = $orders ?? [];
-
-        // Contoh struktur elemen orders:
-        // [
-        //   'id'         => 1,
-        //   'code'       => 'ORD-00123',
-        //   'user_name'  => 'Ibnu Effendi',
-        //   'user_email' => 'ibnu@example.com',
-        //   'plan_name'  => 'Paket Maintain',
-        //   'total'      => 300000,
-        //   'status'     => 'pending', // pending, paid, cooking, delivered, cancelled
-        //   'date'       => '2025-12-01 10:23',
-        // ]
+        $orders = $orders ?? []; 
     @endphp
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <div class="flex flex-col lg:flex-row gap-6">
 
-            {{-- SIDEBAR ADMIN (sama konsep dengan dashboard admin) --}}
-            <aside class="w-full lg:w-64 bg-green-800/90 border border-green-700/70 rounded-3xl p-5 h-max">
-
-                {{-- Profil mini di sidebar --}}
+            {{-- SIDEBAR --}}
+            <aside class="w-full lg:w-64 bg-green-800/90 border border-green-700/70 rounded-3xl p-5 h-max flex-shrink-0">
                 <div class="flex items-center gap-3 mb-6">
-                    <div
-                        class="w-10 h-10 rounded-2xl bg-yellow-400 flex items-center justify-center text-green-900 font-extrabold">
+                    <div class="w-10 h-10 rounded-2xl bg-yellow-400 flex items-center justify-center text-green-900 font-extrabold shadow-md">
                         {{ strtoupper(mb_substr($user->name ?? 'A', 0, 1)) }}
                     </div>
                     <div class="leading-tight">
-                        <p class="text-sm font-semibold text-white">
-                            {{ $user->name ?? 'Admin KaloriKita' }}
-                        </p>
-                        <p class="text-[11px] text-green-100/70">
-                            Admin
-                        </p>
+                        <p class="text-sm font-semibold text-white">{{ $user->name ?? 'Admin' }}</p>
+                        <p class="text-[11px] text-green-100/70">Admin</p>
                     </div>
                 </div>
-
-                {{-- Menu Admin --}}
                 <nav class="space-y-2 text-sm">
-
-                    {{-- Dashboard Admin --}}
-                    <a href="{{ route('admin.dashboard') }}"
-                        class="flex items-center justify-between px-3 py-2 rounded-xl 
-                              {{ request()->routeIs('admin.dashboard') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
-                        <span>Dashboard</span>
-                    </a>
-
-                    {{-- Kelola Pesanan --}}
-                    <a href="{{ route('admin.orders.index') }}"
-                        class="flex items-center justify-between px-3 py-2 rounded-xl 
-                              {{ request()->routeIs('admin.orders.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
-                        <span>Kelola Pesanan</span>
-                    </a>
-
-                    {{-- Paket Katering --}}
-                    <a href="{{ route('admin.paket.index') }}"
-                        class="flex items-center justify-between px-3 py-2 rounded-xl 
-                              {{ request()->routeIs('admin.paket.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
-                        <span>Paket Katering</span>
-                    </a>
-
-                    {{-- Data Pengguna --}}
-                    <a href="{{ route('admin.users.index') }}"
-                        class="flex items-center justify-between px-3 py-2 rounded-xl 
-                              {{ request()->routeIs('admin.users.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
-                        <span>Data Pengguna</span>
-                    </a>
-
-                    {{-- Laporan --}}
-                    <a href="{{ route('admin.reports.index') }}"
-                        class="flex items-center justify-between px-3 py-2 rounded-xl 
-                              {{ request()->routeIs('admin.reports.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
-                        <span>Laporan</span>
-                    </a>
-
-                    {{-- Log KaloriLab (AI) --}}
-                    <a href="{{ route('admin.ai.logs') }}"
-                        class="flex items-center justify-between px-3 py-2 rounded-xl 
-                              {{ request()->routeIs('admin.ai.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
-                        <span>Log KaloriLab (AI)</span>
-                    </a>
-
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}"><span>Dashboard</span></a>
+                    <a href="{{ route('admin.orders.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.orders.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}"><span>Kelola Pesanan</span></a>
+                    <a href="{{ route('admin.paket.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.paket.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}"><span>Paket Katering</span></a>
+                    <a href="{{ route('admin.users.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.users.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}"><span>Data Pengguna</span></a>
+                    <a href="{{ route('admin.reports.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.reports.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}"><span>Laporan</span></a>
+                    <a href="{{ route('admin.ai.logs') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.ai.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}"><span>Log KaloriLab (AI)</span></a>
                     <div class="border-t border-green-700/60 my-3"></div>
-
-                    {{-- Kembali ke tampilan user --}}
-                    <a href="{{ route('profil.dashboard') }}"
-                        class="flex items-center justify-between px-3 py-2 rounded-xl text-[11px] text-green-100 hover:bg-green-700/70">
-                        <span>Masuk sebagai Pengguna</span>
-                    </a>
-
-                    {{-- Logout --}}
-                    <form action="{{ route('logout') }}" method="POST" class="mt-4">
-                        @csrf
-                        <button type="submit"
-                            class="w-full flex items-center justify-center px-3 py-2 rounded-xl text-red-100 bg-red-900/40 hover:bg-red-800/70 text-xs font-semibold">
-                            Logout
-                        </button>
-                    </form>
-
+                    <a href="{{ route('profil.dashboard') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[11px] text-green-100 hover:bg-green-700/70"><span>Masuk sebagai Pengguna</span></a>
+                    <form action="{{ route('logout') }}" method="POST">@csrf <button class="w-full mt-3 px-3 py-2 rounded-xl bg-red-900/50 text-red-100 text-xs hover:bg-red-800/70">Logout</button></form>
                 </nav>
             </aside>
 
-            {{-- KONTEN UTAMA: KELOLA PESANAN --}}
-            <main class="flex-1">
+            {{-- KONTEN UTAMA --}}
+            <main class="flex-1 space-y-6">
 
-                {{-- Header + filter --}}
-                <section
-                    class="bg-green-800/90 border border-green-700/70 rounded-3xl p-6 sm:p-7 shadow-xl shadow-black/20 mb-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                        <div>
-                            <h1 class="text-xl sm:text-2xl font-semibold text-white">Kelola Pesanan</h1>
-                            <p class="text-xs text-green-100/70 mt-1">
-                                Pantau dan atur pesanan katering pengguna KaloriKita.
-                            </p>
-                        </div>
-
-                        {{-- Ringkasan kecil --}}
-                        <div class="flex flex-wrap gap-3 text-xs">
-                            <div
-                                class="px-3 py-2 rounded-2xl bg-green-900/60 border border-green-600/70 text-green-100/90">
-                                <p class="text-[10px] uppercase tracking-wide text-green-200/70">Total Pesanan</p>
-                                <p class="font-semibold text-sm">{{ count($orders) }}</p>
-                            </div>
-                            {{-- Jika nanti mau tambahin by status, bisa dari controller --}}
-                        </div>
+                {{-- SATU HEADER BESAR (GABUNGAN JUDUL & FILTER) --}}
+                <section class="bg-green-800/90 border border-green-700/70 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                    
+                    {{-- Hiasan Background --}}
+                    <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                        <i class="bi bi-cart-check text-[10rem] text-white"></i>
                     </div>
 
-                    {{-- Filter bar --}}
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mt-2 text-xs">
-                        {{-- Cari keyword --}}
-                        <div>
-                            <label class="block text-green-100/80 mb-1">Cari</label>
-                            <div class="relative">
-                                <input type="text" name="q" placeholder="Nama, email, kode pesanan..."
-                                    class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs placeholder:text-green-200/40 focus:outline-none focus:ring-1 focus:ring-yellow-300">
-                                <span
-                                    class="absolute inset-y-0 right-3 flex items-center text-[11px] text-green-200/60">⌕</span>
+                    <div class="relative z-10">
+                        {{-- Bagian Atas: Judul & Total --}}
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
+                            <div>
+                                <h1 class="text-2xl font-bold text-white tracking-tight">Kelola Pesanan</h1>
+                                <p class="text-xs text-green-200/80 mt-1">Pantau, cari, dan kelola transaksi pelanggan.</p>
+                            </div>
+                            
+                            <div class="bg-green-900/60 backdrop-blur-sm rounded-xl px-5 py-2.5 border border-green-600/30 text-right shadow-lg">
+                                <p class="text-[10px] text-green-300 uppercase tracking-wider font-bold">Total Pesanan</p>
+                                <p class="text-2xl font-bold text-white">{{ count($orders) }}</p>
                             </div>
                         </div>
 
-                        {{-- Status --}}
-                        <div>
-                            <label class="block text-green-100/80 mb-1">Status</label>
-                            <select
-                                class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
-                                <option value="">Semua status</option>
-                                <option value="pending">Pending</option>
-                                <option value="paid">Sudah dibayar</option>
-                                <option value="cooking">Diproses / Dimasak</option>
-                                <option value="delivered">Terkirim</option>
-                                <option value="cancelled">Dibatalkan</option>
-                            </select>
-                        </div>
+                        {{-- Bagian Bawah: Filter (Menyatu dalam Header) --}}
+                        <div class="bg-green-900/40 border border-green-600/30 rounded-2xl p-4 backdrop-blur-sm">
+                            <form action="{{ route('admin.orders.index') }}" method="GET">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                                    {{-- Cari --}}
+                                    <div class="md:col-span-1">
+                                        <label class="block text-green-200/70 mb-1 font-medium">Pencarian</label>
+                                        <div class="relative">
+                                            <input type="text" name="q" placeholder="Nama / Kode Order..." value="{{ request('q') }}"
+                                                class="w-full rounded-xl bg-green-800/60 border border-green-600/60 text-green-50 px-3 py-2.5 text-xs placeholder:text-green-200/30 focus:outline-none focus:ring-1 focus:ring-yellow-400 transition">
+                                            <i class="bi bi-search absolute right-3 top-2.5 text-green-200/40"></i>
+                                        </div>
+                                    </div>
 
-                        {{-- Tanggal dari --}}
-                        <div>
-                            <label class="block text-green-100/80 mb-1">Tanggal dari</label>
-                            <input type="date"
-                                class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
-                        </div>
+                                    {{-- Status --}}
+                                    <div>
+                                        <label class="block text-green-200/70 mb-1 font-medium">Status</label>
+                                        <select name="status" class="w-full rounded-xl bg-green-800/60 border border-green-600/60 text-green-50 px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 transition cursor-pointer">
+                                            <option value="">Semua Status</option>
+                                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif / Lunas</option>
+                                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                                        </select>
+                                    </div>
 
-                        {{-- Tanggal sampai --}}
-                        <div>
-                            <label class="block text-green-100/80 mb-1">Sampai</label>
-                            <input type="date"
-                                class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
-                        </div>
-                    </div>
+                                    {{-- Tanggal --}}
+                                    <div class="md:col-span-2 grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-green-200/70 mb-1 font-medium">Dari</label>
+                                            <input type="date" name="start_date" value="{{ request('start_date') }}"
+                                                class="w-full rounded-xl bg-green-800/60 border border-green-600/60 text-green-50 px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-green-200/70 mb-1 font-medium">Sampai</label>
+                                            <input type="date" name="end_date" value="{{ request('end_date') }}"
+                                                class="w-full rounded-xl bg-green-800/60 border border-green-600/60 text-green-50 px-3 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 transition">
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <div class="mt-4 flex justify-end">
-                        <button
-                            class="inline-flex items-center gap-2 rounded-full bg-yellow-400 text-green-900 px-4 py-2 text-xs font-semibold hover:bg-yellow-300 transition">
-                            Terapkan Filter
-                        </button>
+                                {{-- Tombol Filter --}}
+                                <div class="mt-3 flex justify-end">
+                                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-yellow-400 text-green-900 px-5 py-2 text-xs font-bold shadow-md hover:bg-yellow-300 transition hover:-translate-y-0.5">
+                                        <i class="bi bi-funnel-fill"></i> Terapkan Filter
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </section>
 
-                {{-- Tabel pesanan --}}
-                <section class="bg-green-800/90 border border-green-700/70 rounded-3xl p-4 sm:p-6 shadow-xl">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-sm font-semibold text-white">Daftar Pesanan</h2>
-                        <span class="text-[11px] text-green-100/70">
-                            Menampilkan {{ count($orders) }} pesanan
-                        </span>
+                {{-- TABEL PESANAN --}}
+                <div class="bg-green-800/90 border border-green-700/70 rounded-3xl p-6 shadow-xl min-h-[400px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-sm font-bold text-white">Daftar Transaksi</h2>
                     </div>
 
-                    @if (empty($orders))
-                        <div
-                            class="border border-dashed border-green-600/80 rounded-2xl p-6 text-center text-xs text-green-100/80">
-                            <p>Belum ada pesanan untuk ditampilkan.</p>
-                            <p class="text-green-100/60 mt-1">
-                                Pesanan pengguna akan muncul di sini setelah mereka checkout paket.
-                            </p>
-                        </div>
-                    @else
-                        <div class="overflow-x-auto scroll-thin">
-                            <table class="min-w-full text-xs text-left text-green-50">
-                                <thead>
-                                    <tr class="border-b border-green-700/80 text-[11px] uppercase text-green-200/80">
-                                        <th class="py-2 pr-4">Kode</th>
-                                        <th class="py-2 pr-4">Pengguna</th>
-                                        <th class="py-2 pr-4">Paket</th>
-                                        <th class="py-2 pr-4">Tanggal</th>
-                                        <th class="py-2 pr-4">Total</th>
-                                        <th class="py-2 pr-4">Status</th>
-                                        <th class="py-2 pr-4 text-right">Aksi</th>
+                    <div class="overflow-x-auto scroll-thin">
+                        <table class="w-full text-left text-sm text-green-50">
+                            <thead class="bg-green-900/50 text-green-200 uppercase text-[10px] font-bold border-b border-green-600/50 tracking-wider">
+                                <tr>
+                                    <th class="px-4 py-3">Kode</th>
+                                    <th class="px-4 py-3">Pengguna</th>
+                                    <th class="px-4 py-3">Paket</th>
+                                    <th class="px-4 py-3">Tanggal</th>
+                                    <th class="px-4 py-3">Total</th>
+                                    <th class="px-4 py-3">Status</th>
+                                    <th class="px-4 py-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-green-700/50 text-xs">
+                                @forelse($orders as $order)
+                                    <tr class="hover:bg-green-900/30 transition duration-150 group">
+                                        <td class="px-4 py-4 font-mono font-bold text-white uppercase tracking-wide">
+                                            {{ $order['code'] }}
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <p class="font-bold text-white">{{ $order['user_name'] }}</p>
+                                            <p class="text-[10px] text-green-200/60">{{ $order['user_email'] }}</p>
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <span class="inline-block bg-green-900 text-green-100 text-[10px] px-2.5 py-1 rounded-md border border-green-600/50 font-bold uppercase tracking-wide">
+                                                {{ $order['plan_name'] }}
+                                            </span>
+                                            @if(!empty($order['periode']))
+                                                <p class="text-[10px] text-green-200/50 mt-1">{{ $order['periode'] }}</p>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-4 text-green-200/80 whitespace-nowrap">
+                                            {{ $order['date'] }}
+                                        </td>
+                                        <td class="px-4 py-4 font-bold text-yellow-300">
+                                            Rp {{ number_format($order['total'], 0, ',', '.') }}
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            @php
+                                                $s = $order['status'];
+                                                $badgeClass = match($s) {
+                                                    'aktif', 'paid' => 'bg-emerald-500/20 text-emerald-200 border-emerald-500/40',
+                                                    'pending' => 'bg-yellow-500/20 text-yellow-200 border-yellow-500/40',
+                                                    'cancelled', 'expire' => 'bg-red-500/20 text-red-200 border-red-500/40',
+                                                    default => 'bg-gray-500/20 text-gray-200 border-gray-500/40'
+                                                };
+                                                $label = match($s) {
+                                                    'aktif', 'paid' => 'Lunas / Aktif',
+                                                    'pending' => 'Belum Bayar',
+                                                    'cancelled', 'expire' => 'Dibatalkan',
+                                                    default => ucfirst($s)
+                                                };
+                                            @endphp
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold border {{ $badgeClass }}">
+                                                {{ $label }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-4 text-right">
+                                            <a href="{{ route('admin.orders.show', $order['id']) }}" class="w-8 h-8 rounded-full bg-green-700/50 border border-green-600/50 inline-flex items-center justify-center text-green-100 hover:bg-green-600 hover:text-white transition shadow-sm group-hover:scale-105">
+                                                <i class="bi bi-chevron-right text-xs"></i>
+                                            </a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody class="divide-y divide-green-700/70">
-                                    @foreach ($orders as $order)
-                                        @php
-                                            $status = $order['status'] ?? 'pending';
-                                            $statusLabel = [
-                                                'pending'   => 'Pending',
-                                                'paid'      => 'Sudah Dibayar',
-                                                'cooking'   => 'Diproses',
-                                                'delivered' => 'Terkirim',
-                                                'cancelled' => 'Dibatalkan',
-                                            ][$status] ?? ucfirst($status);
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-16 text-center">
+                                            <div class="flex flex-col items-center justify-center text-green-200/30">
+                                                <i class="bi bi-inbox text-4xl mb-3"></i>
+                                                <p class="text-sm font-medium">Belum ada pesanan masuk.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
 
-                                            $statusColor = match ($status) {
-                                                'pending'   => 'bg-yellow-400/20 text-yellow-200 border-yellow-400/40',
-                                                'paid'      => 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-                                                'cooking'   => 'bg-blue-400/20 text-blue-200 border-blue-400/40',
-                                                'delivered' => 'bg-green-400/20 text-green-200 border-green-400/40',
-                                                'cancelled' => 'bg-red-400/20 text-red-200 border-red-400/40',
-                                                default     => 'bg-green-400/20 text-green-200 border-green-400/40',
-                                            };
-                                        @endphp
-                                        <tr class="hover:bg-green-900/40 transition">
-                                            <td class="py-3 pr-4 align-top">
-                                                <p class="font-semibold text-[13px]">
-                                                    {{ $order['code'] ?? ('ORD-' . str_pad($order['id'] ?? 0, 5, '0', STR_PAD_LEFT)) }}
-                                                </p>
-                                                <p class="text-[11px] text-green-200/70">
-                                                    ID: {{ $order['id'] ?? '-' }}
-                                                </p>
-                                            </td>
-
-                                            <td class="py-3 pr-4 align-top">
-                                                <p class="font-semibold">
-                                                    {{ $order['user_name'] ?? 'Pengguna' }}
-                                                </p>
-                                                <p class="text-[11px] text-green-200/70">
-                                                    {{ $order['user_email'] ?? '-' }}
-                                                </p>
-                                            </td>
-
-                                            <td class="py-3 pr-4 align-top">
-                                                <p class="font-semibold">
-                                                    {{ $order['plan_name'] ?? 'Paket Katering' }}
-                                                </p>
-                                            </td>
-
-                                            <td class="py-3 pr-4 align-top">
-                                                <p class="text-[11px] text-green-100/80">
-                                                    {{ $order['date'] ?? '-' }}
-                                                </p>
-                                            </td>
-
-                                            <td class="py-3 pr-4 align-top">
-                                                <p class="font-semibold text-yellow-300">
-                                                    Rp {{ number_format($order['total'] ?? 0, 0, ',', '.') }}
-                                                </p>
-                                            </td>
-
-                                            <td class="py-3 pr-4 align-top">
-                                                <span
-                                                    class="inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-semibold {{ $statusColor }}">
-                                                    {{ $statusLabel }}
-                                                </span>
-                                            </td>
-
-                                            <td class="py-3 pr-0 align-top">
-                                                <div class="flex items-center justify-end gap-2">
-                                                    <a href="{{ route('admin.orders.show', $order['id']) }}"
-                                                        class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-[11px] text-green-50 border border-green-500/60 hover:bg-white/20 transition">
-                                                        Detail
-                                                    </a>
-                                                    {{-- Tombol aksi cepat (misal ubah status) bisa ditambah di sini nanti --}}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                    {{-- Footer Pagination (Statik Sesuai Desain) --}}
+                    @if(count($orders) > 0)
+                    <div class="px-6 py-4 border-t border-green-700/50 bg-green-900/20 flex items-center justify-between mt-auto">
+                        <p class="text-[11px] text-green-200/60">Menampilkan {{ count($orders) }} data.</p>
+                        <div class="flex gap-2">
+                            <button class="w-8 h-8 rounded-lg bg-green-900/50 border border-green-700/50 text-green-200 text-xs flex items-center justify-center hover:bg-green-800 transition">‹</button>
+                            <button class="w-8 h-8 rounded-lg bg-yellow-400 text-green-900 text-xs font-bold flex items-center justify-center shadow-md">1</button>
+                            <button class="w-8 h-8 rounded-lg bg-green-900/50 border border-green-700/50 text-green-200 text-xs flex items-center justify-center hover:bg-green-800 transition">›</button>
                         </div>
-
-                        {{-- Pagination placeholder --}}
-                        <div class="mt-4 flex items-center justify-between text-[11px] text-green-100/70">
-                            <p>Menampilkan {{ count($orders) }} pesanan (pagination bisa ditambahkan nanti).</p>
-                            <div class="flex gap-1">
-                                <button
-                                    class="px-3 py-1 rounded-full bg-green-900/70 border border-green-600/70 hover:bg-green-900 text-green-100">
-                                    ‹
-                                </button>
-                                <button
-                                    class="px-3 py-1 rounded-full bg-yellow-400 text-green-900 font-semibold">
-                                    1
-                                </button>
-                                <button
-                                    class="px-3 py-1 rounded-full bg-green-900/70 border border-green-600/70 hover:bg-green-900 text-green-100">
-                                    2
-                                </button>
-                                <button
-                                    class="px-3 py-1 rounded-full bg-green-900/70 border border-green-600/70 hover:bg-green-900 text-green-100">
-                                    ›
-                                </button>
-                            </div>
-                        </div>
+                    </div>
                     @endif
-                </section>
+                </div>
 
             </main>
 
@@ -357,5 +242,4 @@
     </div>
 
 </body>
-
 </html>

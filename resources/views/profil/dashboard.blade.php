@@ -8,6 +8,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
         body {
@@ -24,12 +25,14 @@
     @php
         $user = auth()->user();
 
-        // Placeholder sementara, nantinya diisi dari controller
+        // Data dikirim dari ProfilDashboardController
+        // Kita pakai default value (??) biar tidak error kalau data kosong
         $activePlan = $activePlan ?? null;
+        $todaysMenu = $todaysMenu ?? null;
         $todayCalories = $todayCalories ?? 0;
         $todayTarget = $todayTarget ?? null;
         $lastAiInsight = $lastAiInsight ?? null;
-        $recentOrders = $recentOrders ?? [];
+        $recentOrders = $recentOrders ?? collect([]); // Pakai collect biar aman
         $notifications = $notifications ?? [];
 
         $googleConnected = !empty($user?->google_id);
@@ -40,12 +43,11 @@
         <div class="flex flex-col lg:flex-row gap-6">
 
             {{-- SIDEBAR --}}
-            <aside class="w-full lg:w-64 bg-green-800/90 border border-green-700/70 rounded-3xl p-5 h-max">
+            <aside class="w-full lg:w-64 bg-green-800/90 border border-green-700/70 rounded-3xl p-5 h-max flex-shrink-0">
 
                 {{-- Profil mini di sidebar --}}
                 <div class="flex items-center gap-3 mb-6">
-                    <div
-                        class="w-10 h-10 rounded-2xl bg-yellow-400 flex items-center justify-center text-green-900 font-extrabold">
+                    <div class="w-10 h-10 rounded-2xl bg-yellow-400 flex items-center justify-center text-green-900 font-extrabold">
                         {{ strtoupper(mb_substr($user->name ?? 'U', 0, 1)) }}
                     </div>
                     <div class="leading-tight">
@@ -133,11 +135,9 @@
                 <section class="flex flex-col gap-6 lg:flex-row">
 
                     {{-- Card profil & quick actions --}}
-                    <div
-                        class="flex-1 bg-green-800/80 border border-green-700/60 rounded-3xl p-6 sm:p-7 shadow-xl shadow-black/20">
+                    <div class="flex-1 bg-green-800/80 border border-green-700/60 rounded-3xl p-6 sm:p-7 shadow-xl shadow-black/20">
                         <div class="flex items-center gap-4 mb-4">
-                            <div
-                                class="w-14 h-14 rounded-2xl bg-yellow-400/90 flex items-center justify-center text-green-900 font-extrabold text-xl">
+                            <div class="w-14 h-14 rounded-2xl bg-yellow-400/90 flex items-center justify-center text-green-900 font-extrabold text-xl">
                                 {{ strtoupper(mb_substr($user->name ?? 'U', 0, 1)) }}
                             </div>
                             <div>
@@ -155,8 +155,7 @@
                                         {{ $user->role === 'admin' ? 'Admin' : 'Pengguna' }}
                                     </p>
                                 </div>
-                                <span
-                                    class="inline-flex items-center rounded-full bg-green-700/80 px-3 py-1 text-[11px] font-semibold text-green-100">
+                                <span class="inline-flex items-center rounded-full bg-green-700/80 px-3 py-1 text-[11px] font-semibold text-green-100">
                                     • Akun Aktif
                                 </span>
                             </div>
@@ -164,47 +163,37 @@
                             <div class="flex items-center justify-between bg-green-900/50 rounded-2xl px-4 py-3">
                                 <div>
                                     <p class="text-xs text-green-200/80">Google</p>
-                                    <p
-                                        class="text-sm font-semibold {{ $googleConnected ? 'text-emerald-300' : 'text-yellow-300' }}">
+                                    <p class="text-sm font-semibold {{ $googleConnected ? 'text-emerald-300' : 'text-yellow-300' }}">
                                         {{ $googleConnected ? 'Terhubung' : 'Belum terhubung' }}
                                     </p>
                                 </div>
                                 @if (!$googleConnected)
-                                    <a href="{{ route('google.connect') }}"
-                                        class="text-[11px] font-semibold text-yellow-200 hover:text-yellow-100 underline">
-                                        Hubungkan
-                                    </a>
+                                    <a href="{{ route('google.connect') }}" class="text-[11px] font-semibold text-yellow-200 hover:text-yellow-100 underline">Hubungkan</a>
                                 @endif
                             </div>
                         </div>
 
-                        {{-- Quick Actions --}}
                         <div class="mt-6">
                             <p class="text-xs text-green-100/70 mb-2">Aksi Cepat</p>
                             <div class="flex flex-wrap gap-3">
-                                <a href="{{ route('paket.list') }}"
-                                    class="inline-flex items-center gap-2 rounded-full bg-yellow-400 text-green-900 px-4 py-2 text-xs font-semibold shadow-md hover:bg-yellow-300 transition">
+                                <a href="{{ route('paket.list') }}" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 text-green-900 px-4 py-2 text-xs font-semibold shadow-md hover:bg-yellow-300 transition">
                                     Pesan Paket
                                 </a>
-                                <a href="{{ route('profil.kalori.tracker') }}"
-                                    class="inline-flex items-center gap-2 rounded-full bg-white text-green-900 px-4 py-2 text-xs font-semibold shadow-md hover:bg-green-50 transition">
+                                <a href="{{ route('profil.kalori.tracker') }}" class="inline-flex items-center gap-2 rounded-full bg-white text-green-900 px-4 py-2 text-xs font-semibold shadow-md hover:bg-green-50 transition">
                                     Kalori Tracker
                                 </a>
-                                <a href="/kalori-lab"
-                                    class="inline-flex items-center gap-2 rounded-full bg-green-700/80 text-green-50 px-4 py-2 text-xs font-semibold hover:bg-green-600 transition">
+                                <a href="/kalori-lab" class="inline-flex items-center gap-2 rounded-full bg-green-700/80 text-green-50 px-4 py-2 text-xs font-semibold hover:bg-green-600 transition">
                                     KaloriLab (AI)
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Kolom kanan atas: Kalori + notif singkat --}}
+                    {{-- Card Kalori Hari Ini --}}
                     <div class="w-full lg:w-80 flex flex-col gap-4">
 
-                        {{-- Kalori hari ini --}}
                         <div class="bg-white rounded-3xl p-5 shadow-xl shadow-black/30 text-green-900">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-green-700 mb-1">Kalori Hari Ini
-                            </p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-green-700 mb-1">Kalori Hari Ini</p>
                             <div class="flex items-end gap-2 mb-3">
                                 <p class="text-3xl font-extrabold leading-tight">
                                     {{ $todayCalories }} <span class="text-base font-semibold">kkal</span>
@@ -218,10 +207,7 @@
 
                             @if ($todayTarget)
                                 @php
-                                    $pct = min(
-                                        100,
-                                        $todayTarget > 0 ? round(($todayCalories / $todayTarget) * 100) : 0,
-                                    );
+                                    $pct = min(100, $todayTarget > 0 ? round(($todayCalories / $todayTarget) * 100) : 0);
                                 @endphp
                                 <div class="w-full h-2.5 bg-green-100 rounded-full overflow-hidden mb-2">
                                     <div class="h-full bg-green-700" style="width: {{ $pct }}%"></div>
@@ -235,19 +221,16 @@
                                 </p>
                             @endif
 
-                            <a href="{{ route('profil.kalori.tracker') }}"
-                                class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-full bg-green-800 text-yellow-200 text-xs font-semibold hover:bg-green-700 transition">
+                            <a href="{{ route('profil.kalori.tracker') }}" class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-full bg-green-800 text-yellow-200 text-xs font-semibold hover:bg-green-700 transition">
                                 Lihat detail tracker
                             </a>
                         </div>
 
-                        {{-- Notifikasi singkat --}}
+                        {{-- Notifikasi --}}
                         <div class="bg-green-800/90 border border-green-700/70 rounded-3xl p-4 shadow-lg">
                             <p class="text-xs text-green-100/80 mb-2 flex items-center justify-between">
                                 <span>Notifikasi Terbaru</span>
-                                <span class="text-[10px] bg-green-700/70 rounded-full px-2 py-0.5">
-                                    {{ count($notifications) }} item
-                                </span>
+                                <span class="text-[10px] bg-green-700/70 rounded-full px-2 py-0.5">{{ count($notifications) }} item</span>
                             </p>
 
                             @if (empty($notifications))
@@ -257,9 +240,7 @@
                                     @foreach ($notifications as $notif)
                                         <li class="text-xs text-green-100/80 bg-green-900/70 rounded-2xl px-3 py-2">
                                             <p class="font-semibold">{{ $notif['title'] ?? 'Notifikasi' }}</p>
-                                            <p class="text-[11px] text-green-100/70">
-                                                {{ $notif['message'] ?? '' }}
-                                            </p>
+                                            <p class="text-[11px] text-green-100/70">{{ $notif['message'] ?? '' }}</p>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -273,59 +254,73 @@
                 {{-- GRID TENGAH: Paket aktif + KaloriLab --}}
                 <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                    {{-- Paket aktif --}}
+                    {{-- Paket aktif (LOGIKA REAL) --}}
                     <div class="lg:col-span-2 bg-green-800/80 border border-green-700/60 rounded-3xl p-6 shadow-xl">
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">Paket Aktif</h2>
-                                <p class="text-xs text-green-100/70">
-                                    Status langganan katering sehatmu.
-                                </p>
+                                <p class="text-xs text-green-100/70">Status langganan katering sehatmu.</p>
                             </div>
-                            <a href="{{ route('paket.list') }}"
-                                class="text-xs font-semibold text-yellow-300 hover:text-yellow-200 underline">
+                            <a href="{{ route('paket.list') }}" class="text-xs font-semibold text-yellow-300 hover:text-yellow-200 underline">
                                 Lihat semua paket
                             </a>
                         </div>
 
                         @if ($activePlan)
-                            <div
-                                class="bg-green-900/60 border border-green-700/60 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:items-center">
-                                <div class="flex-1">
-                                    <p class="text-xs text-green-100/80 mb-1">Nama Paket</p>
-                                    <p class="text-sm sm:text-base font-semibold text-white">
-                                        {{ $activePlan['name'] ?? 'Paket Anda' }}
-                                    </p>
+                            {{-- TAMPILAN JIKA ADA PAKET AKTIF --}}
+                            <div class="bg-green-900/60 border border-green-700/60 rounded-2xl p-4 sm:p-5">
+                                <div class="flex flex-col sm:flex-row gap-4 sm:items-center">
+                                    <div class="flex-1">
+                                        <p class="text-xs text-green-100/80 mb-1">Nama Paket</p>
+                                        <p class="text-sm sm:text-base font-semibold text-white">
+                                            {{ $activePlan->paketCategory->nama_kategori }} ({{ $activePlan->paketOption->periode }})
+                                        </p>
 
-                                    <div class="grid grid-cols-2 gap-3 mt-3 text-[11px] sm:text-xs text-green-100/80">
-                                        <div>
-                                            <p class="text-green-100/60">Berakhir pada</p>
-                                            <p class="font-semibold">
-                                                {{ $activePlan['ends_at'] ?? '-' }}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p class="text-green-100/60">Sisa Kotak</p>
-                                            <p class="font-semibold">
-                                                {{ $activePlan['boxes_left'] ?? '-' }} box
-                                            </p>
+                                        <div class="grid grid-cols-2 gap-3 mt-3 text-[11px] sm:text-xs text-green-100/80">
+                                            <div>
+                                                <p class="text-green-100/60">Berakhir pada</p>
+                                                <p class="font-semibold">{{ \Carbon\Carbon::parse($activePlan->end_date)->translatedFormat('d M Y') }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-green-100/60">Sisa Hari</p>
+                                                <p class="font-semibold">{{ max(0, \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($activePlan->end_date))) }} Hari</p>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div class="flex flex-col gap-2 sm:items-end">
+                                        <span class="inline-flex items-center rounded-full bg-yellow-400/90 text-green-900 px-3 py-1 text-[11px] font-semibold">
+                                            Paket Aktif
+                                        </span>
+                                        {{-- Tombol Lihat Detail --}}
+                                        <a href="{{ route('profil.order.show', $activePlan->order_code) }}" 
+                                           class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-green-700 text-green-50 text-xs font-semibold hover:bg-green-600 transition">
+                                            Lihat Menu Harian <i class="bi bi-arrow-right ml-1"></i>
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col gap-2 sm:items-end">
-                                    <span
-                                        class="inline-flex items-center rounded-full bg-yellow-400/90 text-green-900 px-3 py-1 text-[11px] font-semibold">
-                                        Paket Aktif
-                                    </span>
-                                    <a href="{{ route('paket.checkout', ['plan' => $activePlan['slug'] ?? null]) }}"
-                                        class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-green-700 text-green-50 text-xs font-semibold hover:bg-green-600 transition">
-                                        Perpanjang / Upgrade
-                                    </a>
-                                </div>
+
+                                {{-- MENU HARI INI (Jika Admin sudah buat jadwal) --}}
+                                @if($todaysMenu)
+                                    <div class="mt-4 pt-4 border-t border-green-700/50">
+                                        <p class="text-xs font-bold text-yellow-300 mb-2 flex items-center gap-1">
+                                            <i class="bi bi-calendar-check"></i> Menu Hari Ini ({{ \Carbon\Carbon::now()->translatedFormat('l, d M') }})
+                                        </p>
+                                        <div class="grid grid-cols-2 gap-2 text-xs text-white">
+                                            <div class="bg-green-800/50 p-2 rounded-lg border border-green-600/30">
+                                                <span class="text-green-300 font-bold block text-[10px] uppercase">Siang</span> 
+                                                {{ $todaysMenu->lunchMenu->nama_menu }}
+                                            </div>
+                                            <div class="bg-green-800/50 p-2 rounded-lg border border-green-600/30">
+                                                <span class="text-indigo-300 font-bold block text-[10px] uppercase">Malam</span> 
+                                                {{ $todaysMenu->dinnerMenu->nama_menu }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         @else
-                            <div
-                                class="bg-green-900/60 border border-dashed border-green-600/80 rounded-2xl p-5 text-center">
+                            {{-- TAMPILAN JIKA TIDAK ADA PAKET --}}
+                            <div class="bg-green-900/60 border border-dashed border-green-600/80 rounded-2xl p-5 text-center">
                                 <p class="text-sm text-green-100/80 mb-2">
                                     Kamu belum memiliki paket katering aktif.
                                 </p>
@@ -340,14 +335,12 @@
                         @endif
                     </div>
 
-                    {{-- KaloriLab AI Preview --}}
+                    {{-- KaloriLab AI --}}
                     <div class="bg-green-800/80 border border-green-700/60 rounded-3xl p-6 shadow-xl flex flex-col">
                         <div class="flex items-center justify-between mb-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">KaloriLab (AI)</h2>
-                                <p class="text-xs text-green-100/70">
-                                    Ringkasan insight AI terakhirmu.
-                                </p>
+                                <p class="text-xs text-green-100/70">Ringkasan insight AI terakhirmu.</p>
                             </div>
                         </div>
 
@@ -356,117 +349,72 @@
                                 <p class="text-xs text-green-100/80 line-clamp-5">
                                     {{ $lastAiInsight }}
                                 </p>
-
                                 <div class="mt-4 flex flex-wrap gap-2">
                                     <button type="button" id="btn-open-insight-modal"
                                         class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-white/10 border border-yellow-300 text-yellow-200 text-xs font-semibold hover:bg-white/20 transition">
-                                        Lihat Insight Lengkap
+                                        Lihat Lengkap
                                     </button>
-
-                                    <a href="/kalori-lab"
-                                        class="inline-flex flex-1 items-center justify-center px-4 py-2 rounded-full bg-yellow-400 text-green-900 text-xs font-semibold hover:bg-yellow-300 transition">
-                                        Hitung ulang di KaloriLab
+                                    <a href="/kalori-lab" class="inline-flex flex-1 items-center justify-center px-4 py-2 rounded-full bg-yellow-400 text-green-900 text-xs font-semibold hover:bg-yellow-300 transition">
+                                        Hitung Ulang
                                     </a>
                                 </div>
                             </div>
                         @else
                             <div class="bg-green-900/70 rounded-2xl p-4 flex-1 flex flex-col justify-between">
                                 <p class="text-xs text-green-100/80">
-                                    Belum ada insight AI. Coba gunakan KaloriLab untuk menghitung BMI, BMR, dan
-                                    kebutuhan kalorimu.
+                                    Belum ada insight AI. Coba gunakan KaloriLab untuk menghitung kebutuhan kalorimu.
                                 </p>
-                                <a href="/kalori-lab"
-                                    class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-full bg-yellow-400 text-green-900 text-xs font-semibold hover:bg-yellow-300 transition">
-                                    Buka KaloriLab Sekarang
+                                <a href="/kalori-lab" class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-full bg-yellow-400 text-green-900 text-xs font-semibold hover:bg-yellow-300 transition">
+                                    Buka KaloriLab
                                 </a>
                             </div>
                         @endif
-
                     </div>
 
                 </section>
 
-                {{-- BOTTOM: Riwayat Pesanan & Notifikasi lengkap --}}
+                {{-- BOTTOM: Riwayat Pesanan --}}
                 <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
 
-                    {{-- Riwayat Pesanan --}}
                     <div class="lg:col-span-2 bg-green-800/80 border border-green-700/60 rounded-3xl p-6 shadow-xl">
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">Riwayat Pesanan</h2>
-                                <p class="text-xs text-green-100/70">
-                                    Pesanan paket katering yang pernah kamu buat.
-                                </p>
+                                <p class="text-xs text-green-100/70">Pesanan paket katering yang pernah kamu buat.</p>
                             </div>
-                            <span class="text-[11px] text-green-100/70">
-                                {{ count($recentOrders) }} pesanan
-                            </span>
+                            <span class="text-[11px] text-green-100/70">{{ count($recentOrders) }} pesanan</span>
                         </div>
 
-                        @if (empty($recentOrders))
+                        @if ($recentOrders->isEmpty())
                             <p class="text-xs text-green-100/70">
-                                Belum ada pesanan. Yuk mulai dengan memilih paket yang sesuai dengan targetmu.
+                                Belum ada pesanan. Yuk mulai dengan memilih paket.
                             </p>
                         @else
                             <div class="space-y-3 max-h-72 overflow-y-auto pr-1">
                                 @foreach ($recentOrders as $order)
-                                    <div
-                                        class="bg-green-900/70 rounded-2xl px-4 py-3 flex items-center justify-between text-xs text-green-100/85">
+                                    <div class="bg-green-900/70 rounded-2xl px-4 py-3 flex items-center justify-between text-xs text-green-100/85">
                                         <div>
-                                            <p class="font-semibold">
-                                                {{ $order['plan_name'] ?? 'Paket Katering' }}
+                                            <p class="font-semibold text-white">
+                                                {{ $order->paketCategory->nama_kategori }} ({{ $order->paketOption->periode }})
                                             </p>
                                             <p class="text-[11px] text-green-100/60">
-                                                {{ $order['date'] ?? '-' }} • {{ $order['status'] ?? 'Selesai' }}
+                                                {{ $order->created_at->format('d M Y') }} • 
+                                                <span class="font-bold uppercase {{ $order->status == 'aktif' ? 'text-emerald-400' : 'text-yellow-400' }}">
+                                                    {{ $order->status }}
+                                                </span>
                                             </p>
                                         </div>
                                         <div class="text-right">
                                             <p class="font-semibold text-yellow-300">
-                                                Rp {{ number_format($order['total'] ?? 0, 0, ',', '.') }}
+                                                Rp {{ number_format($order->total_harga, 0, ',', '.') }}
                                             </p>
-                                            <a href="#" class="text-[11px] text-green-100/70 underline">
+                                            <a href="{{ route('profil.order.show', $order->order_code) }}" class="text-[11px] text-green-100/70 underline hover:text-white">
                                                 Lihat detail
                                             </a>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
-                        @endif
-                    </div>
-
-                    {{-- Notifikasi lengkap --}}
-                    <div class="bg-green-800/80 border border-green-700/60 rounded-3xl p-6 shadow-xl">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h2 class="text-lg font-semibold text-white">Notifikasi</h2>
-                                <p class="text-xs text-green-100/70">
-                                    Informasi terbaru terkait paket dan aktivitasmu.
-                                </p>
-                            </div>
-                        </div>
-
-                        @if (empty($notifications))
-                            <p class="text-xs text-green-100/70">
-                                Belum ada notifikasi saat ini.
-                            </p>
-                        @else
-                            <ul class="space-y-2 max-h-72 overflow-y-auto pr-1">
-                                @foreach ($notifications as $notif)
-                                    <li class="bg-green-900/70 rounded-2xl px-3 py-2 text-xs text-green-100/85">
-                                        <p class="font-semibold">
-                                            {{ $notif['title'] ?? 'Notifikasi' }}
-                                        </p>
-                                        <p class="text-[11px] text-green-100/70">
-                                            {{ $notif['message'] ?? '' }}
-                                        </p>
-                                        @if (!empty($notif['time']))
-                                            <p class="text-[10px] text-green-100/50 mt-1">
-                                                {{ $notif['time'] }}
-                                            </p>
-                                        @endif
-                                    </li>
-                                @endforeach
-                            </ul>
                         @endif
                     </div>
 
@@ -477,68 +425,36 @@
         </div>
     </div>
 
+    {{-- MODAL INSIGHT AI (Script tetap ada) --}}
     @if ($lastAiInsight)
-        <div id="insight-modal"
-            class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-
+        <div id="insight-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
             <div class="bg-green-800 rounded-2xl max-w-lg w-full mx-4 p-6 shadow-xl relative">
-
-                <button type="button" id="btn-close-insight-modal"
-                    class="absolute top-3 right-3 text-yellow-300 text-xl font-bold">
-                    ✕
-                </button>
-
-                <h3 class="text-xl font-semibold text-yellow-400 mb-4">
-                    Insight KaloriLab Terakhir
-                </h3>
-
-                <div id="modal-insight-content"
-                    class="text-sm text-green-100 leading-relaxed space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                <button type="button" id="btn-close-insight-modal" class="absolute top-3 right-3 text-yellow-300 text-xl font-bold">✕</button>
+                <h3 class="text-xl font-semibold text-yellow-400 mb-4">Insight KaloriLab Terakhir</h3>
+                <div id="modal-insight-content" class="text-sm text-green-100 leading-relaxed space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                     {!! nl2br(e($lastAiInsight)) !!}
                 </div>
-
                 <div class="mt-6 flex items-center justify-between gap-2">
-                    <a href="/kalori-lab"
-                        class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-yellow-400 text-green-900 text-xs font-semibold hover:bg-yellow-300 transition">
-                        Buka KaloriLab
-                    </a>
-                    <button type="button" id="btn-close-insight-modal-bottom"
-                        class="px-4 py-2 rounded-full bg-green-900 text-yellow-200 text-xs font-semibold hover:bg-green-800 transition">
-                        Tutup
-                    </button>
+                    <a href="/kalori-lab" class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-yellow-400 text-green-900 text-xs font-semibold hover:bg-yellow-300 transition">Buka KaloriLab</a>
+                    <button type="button" id="btn-close-insight-modal-bottom" class="px-4 py-2 rounded-full bg-green-900 text-yellow-200 text-xs font-semibold hover:bg-green-800 transition">Tutup</button>
                 </div>
-
             </div>
         </div>
-    @endif
-
-    @if ($lastAiInsight)
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const openBtn = document.getElementById('btn-open-insight-modal');
                 const modal = document.getElementById('insight-modal');
                 const closeTop = document.getElementById('btn-close-insight-modal');
                 const closeBot = document.getElementById('btn-close-insight-modal-bottom');
-
                 if (!openBtn || !modal) return;
-
                 const closeModal = () => modal.classList.add('hidden');
-                const openModal = () => modal.classList.remove('hidden');
-
-                openBtn.addEventListener('click', openModal);
+                openBtn.addEventListener('click', () => modal.classList.remove('hidden'));
                 if (closeTop) closeTop.addEventListener('click', closeModal);
                 if (closeBot) closeBot.addEventListener('click', closeModal);
-
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        closeModal();
-                    }
-                });
+                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
             });
         </script>
     @endif
 
-
 </body>
-
 </html>
