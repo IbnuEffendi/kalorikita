@@ -9,13 +9,9 @@ class MenuController extends Controller
 {
     public function index(Request $request)
     {
-        // ambil value search dari input
         $search = $request->input('search');
-
-        // query dasar
         $query = Menu::orderBy('created_at', 'desc');
 
-        // jika ada pencarian, filter berdasarkan nama atau deskripsi
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama_menu', 'like', '%' . $search . '%')
@@ -23,10 +19,10 @@ class MenuController extends Controller
             });
         }
 
-        // hasil paginasi
-        $menus = $query->paginate(6);
+        // REKOMENDASI TERBAIK: Pakai 1
+        // Hasil: 1 ... 4 5 6 ... 20
+        $menus = $query->paginate(6)->onEachSide(0);
 
-        // kirim ke view
         return view('components.food-menu', compact('menus', 'search'));
     }
 }
