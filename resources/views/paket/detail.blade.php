@@ -31,7 +31,7 @@
                 <i class="fas fa-arrow-left"></i> Kembali ke Menu
             </a>
 
-            {{-- LABEL DINAMIS (Popular, Best Value, High Protein) --}}
+            {{-- LABEL DINAMIS --}}
             <div class="mb-4">
                 <span class="bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full tracking-wide uppercase shadow-md">
                     {{ $category->label_paket }}
@@ -42,7 +42,7 @@
                 Paket {{ $category->nama_kategori }}
             </h1>
 
-            {{-- TARGET SPESIFIK (Dari Database) --}}
+            {{-- TARGET SPESIFIK --}}
             <div class="flex items-center gap-2 text-white/90 text-lg font-medium">
                 <i class="fas fa-bullseye text-[#FDCB5D]"></i>
                 <span>Target: {{ $category->target_program }}</span>
@@ -157,41 +157,24 @@
                     </button>
                 </form>
 
-                <div onclick="toggleModal('konsulModal')" class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-gray-50 transition group">
+                {{-- TOMBOL WHATSAPP LANGSUNG (Direct Link) --}}
+                {{-- Ganti 6281234567890 dengan nomor admin kamu --}}
+                <a href="https://wa.me/6285738526675?text=Halo%20Admin%20KaloriKita,%20saya%20mau%20tanya%20tentang%20paket%20{{ $category->nama_kategori }}" 
+                   target="_blank"
+                   class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center gap-3 hover:bg-gray-50 transition group block">
                     <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition">
-                        <i class="fas fa-user-md text-lg"></i>
+                        <i class="fab fa-whatsapp text-2xl"></i> {{-- Icon diganti jadi WA --}}
                     </div>
                     <div class="flex-1">
                         <p class="text-xs text-gray-500">Masih bingung?</p>
-                        <p class="text-sm font-bold text-blue-600">Tanya Admin</p>
+                        <p class="text-sm font-bold text-blue-600">Chat WhatsApp Admin</p>
                     </div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
-                </div>
+                </a>
+
             </div>
         </div>
     </main>
-
-    {{-- MODAL KONSULTASI --}}
-    <div id="konsulModal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="toggleModal('konsulModal')"></div>
-        <div class="relative bg-white w-full max-w-md mx-auto mt-24 md:mt-32 rounded-3xl shadow-2xl p-6 md:p-8 m-4 animate-fade-in-up">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-900">Konsultasi Gratis</h3>
-                <button onclick="toggleModal('konsulModal')" class="text-gray-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <form>
-                <div class="space-y-4">
-                    <div class="bg-blue-50 p-3 rounded-lg text-xs text-blue-700 mb-2">
-                        Silakan isi data diri, tim Ahli Gizi kami akan menghubungi via WhatsApp.
-                    </div>
-                    <input type="text" value="{{ Auth::check() ? Auth::user()->name : '' }}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 text-sm" placeholder="Nama Lengkap">
-                    <input type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 text-sm" placeholder="No WhatsApp (Contoh: 0812...)">
-                    <textarea rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 text-sm" placeholder="Ceritakan target atau keluhanmu..."></textarea>
-                    <button type="button" onclick="alert('Permintaan konsultasi terkirim!')" class="w-full bg-[#1F5A34] text-white font-bold py-3 rounded-xl hover:bg-[#164226] transition shadow-lg">Kirim Data</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     {{-- SCRIPT JAVASCRIPT --}}
     <script>
@@ -217,11 +200,7 @@
             const formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
             document.getElementById('display-harga').innerText = formatter.format(harga);
         }
-
-        function toggleModal(id){
-            document.getElementById(id).classList.toggle("hidden");
-            document.body.classList.toggle("overflow-hidden");
-        }
+        // Fungsi Modal sudah dihapus karena tidak dipakai
     </script>
 </body>
 </html>
