@@ -35,22 +35,18 @@
         $admin = auth()->user();
 
         /**
-         * Controller diharapkan mengirim:
+         * Controller mengirim:
          * - $userDetail: array atau Eloquent User
          * - (opsional) $stats:
-         *      ['orders_count' => 0, 'orders_total' => 0, 'last_order_at' => null]
+         * ['orders_count' => 0, 'orders_total' => 0, 'last_order_at' => null]
          */
 
-        $u = $userDetail ?? $user ?? null; // fallback kalau namanya beda
+        $u = $userDetail ?? $user ?? null; // fallback
 
-        // helper ambil data aman array/obj
+        // Helper
         function du($u, $key, $default = null) {
-            if (is_array($u)) {
-                return $u[$key] ?? $default;
-            }
-            if (is_object($u)) {
-                return $u->{$key} ?? $default;
-            }
+            if (is_array($u)) return $u[$key] ?? $default;
+            if (is_object($u)) return $u->{$key} ?? $default;
             return $default;
         }
 
@@ -134,40 +130,28 @@
 
                 {{-- Menu --}}
                 <nav class="space-y-2 text-sm">
-
                     <a href="{{ route('admin.dashboard') }}"
-                       class="flex items-center justify-between px-3 py-2 rounded-xl
-                       {{ request()->routeIs('admin.dashboard') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
+                       class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
                         Dashboard
                     </a>
-
                     <a href="{{ route('admin.orders.index') }}"
-                       class="flex items-center justify-between px-3 py-2 rounded-xl
-                       {{ request()->routeIs('admin.orders.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
+                       class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.orders.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
                         Kelola Pesanan
                     </a>
-
                     <a href="{{ route('admin.paket.index') }}"
-                       class="flex items-center justify-between px-3 py-2 rounded-xl
-                       {{ request()->routeIs('admin.paket.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
+                       class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.paket.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
                         Paket Katering
                     </a>
-
                     <a href="{{ route('admin.users.index') }}"
-                       class="flex items-center justify-between px-3 py-2 rounded-xl
-                       {{ request()->routeIs('admin.users.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
+                       class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.users.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
                         Data Pengguna
                     </a>
-
                     <a href="{{ route('admin.reports.index') }}"
-                       class="flex items-center justify-between px-3 py-2 rounded-xl
-                       {{ request()->routeIs('admin.reports.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
+                       class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.reports.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
                         Laporan
                     </a>
-
                     <a href="{{ route('admin.ai.logs') }}"
-                       class="flex items-center justify-between px-3 py-2 rounded-xl
-                       {{ request()->routeIs('admin.ai.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
+                       class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('admin.ai.*') ? 'bg-white text-green-900 font-semibold' : 'text-green-100 hover:bg-green-700/70' }}">
                         Log KaloriLab (AI)
                     </a>
 
@@ -180,12 +164,10 @@
 
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button
-                            class="w-full mt-3 px-3 py-2 rounded-xl bg-red-900/50 text-red-100 text-xs hover:bg-red-800/70">
+                        <button class="w-full mt-3 px-3 py-2 rounded-xl bg-red-900/50 text-red-100 text-xs hover:bg-red-800/70">
                             Logout
                         </button>
                     </form>
-
                 </nav>
             </aside>
 
@@ -210,18 +192,15 @@
                         </div>
 
                         <div class="flex flex-wrap gap-2 justify-end">
-                            <span
-                                class="inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-semibold {{ $roleColor }}">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-semibold {{ $roleColor }}">
                                 {{ $roleLabel }}
                             </span>
 
-                            <span
-                                class="inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-semibold {{ $statusColor }}">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-semibold {{ $statusColor }}">
                                 {{ $statusLabel }}
                             </span>
 
-                            <span
-                                class="inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-semibold {{ $googleColor }}">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full border text-[11px] font-semibold {{ $googleColor }}">
                                 Google: {{ $googleLabel }}
                             </span>
 
@@ -276,32 +255,25 @@
                             <h2 class="text-sm font-semibold text-white mb-3">Aktivitas Pesanan</h2>
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-green-100/80">
-                                <div
-                                    class="rounded-2xl bg-green-900/60 border border-green-600/70 px-4 py-3 flex flex-col gap-1">
+                                <div class="rounded-2xl bg-green-900/60 border border-green-600/70 px-4 py-3 flex flex-col gap-1">
                                     <p class="text-[11px] text-green-200/80">Jumlah Pesanan</p>
                                     <p class="text-lg font-semibold text-yellow-300">{{ $ordersCount }}</p>
                                 </div>
 
-                                <div
-                                    class="rounded-2xl bg-green-900/60 border border-green-600/70 px-4 py-3 flex flex-col gap-1">
+                                <div class="rounded-2xl bg-green-900/60 border border-green-600/70 px-4 py-3 flex flex-col gap-1">
                                     <p class="text-[11px] text-green-200/80">Total Belanja</p>
                                     <p class="text-lg font-semibold text-yellow-300">
                                         Rp {{ number_format($ordersTotal, 0, ',', '.') }}
                                     </p>
                                 </div>
 
-                                <div
-                                    class="rounded-2xl bg-green-900/60 border border-green-600/70 px-4 py-3 flex flex-col gap-1">
+                                <div class="rounded-2xl bg-green-900/60 border border-green-600/70 px-4 py-3 flex flex-col gap-1">
                                     <p class="text-[11px] text-green-200/80">Pesanan Terakhir</p>
                                     <p class="text-xs font-semibold text-green-100">
                                         {{ $lastOrderFormatted }}
                                     </p>
                                 </div>
                             </div>
-
-                            <p class="text-[11px] text-green-100/60 mt-3">
-                                *Data di atas opsional, bisa diisi dari join tabel pesanan kalau nanti backend sudah siap.
-                            </p>
                         </div>
 
                     </div>
@@ -331,41 +303,58 @@
                             @endif
                         </div>
 
-                        {{-- Aksi Admin (placeholder) --}}
-                        <div class="bg-green-800/90 border border-green-700/70 rounded-3xl p-5 shadow-xl">
-                            <h2 class="text-sm font-semibold text-white mb-3">Aksi Admin</h2>
+                        {{-- Aksi Admin (FINALIZED) --}}
+                        @if ($u->id !== $admin->id) {{-- Cek: Jangan edit diri sendiri --}}
+                            <div class="bg-green-800/90 border border-green-700/70 rounded-3xl p-5 shadow-xl">
+                                <h2 class="text-sm font-semibold text-white mb-3">Aksi Admin</h2>
 
-                            <div class="flex flex-col gap-2 text-xs">
-                                @if ($role !== 'admin')
-                                    <button
-                                        class="w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-purple-500/20 text-purple-100 border border-purple-400/50 hover:bg-purple-500/30 transition">
-                                        Jadikan Admin
-                                    </button>
-                                @else
-                                    <button
-                                        class="w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-slate-500/20 text-slate-100 border border-slate-400/50 hover:bg-slate-500/30 transition">
-                                        Turunkan ke Pengguna Biasa
-                                    </button>
-                                @endif
+                                <div class="flex flex-col gap-2 text-xs">
+                                    
+                                    {{-- Form Ubah Role --}}
+                                    <form action="{{ route('admin.users.updateRole', $u->id) }}" method="POST"
+                                          onsubmit="return confirm('Apakah Anda yakin ingin mengubah role pengguna ini?');">
+                                        @csrf
+                                        @method('PATCH')
 
-                                @if ($status === 'active')
-                                    <button
-                                        class="w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-red-500/20 text-red-100 border border-red-400/50 hover:bg-red-500/30 transition">
-                                        Nonaktifkan Akun
-                                    </button>
-                                @else
-                                    <button
-                                        class="w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-100 border border-emerald-400/50 hover:bg-emerald-500/30 transition">
-                                        Aktifkan Akun
-                                    </button>
-                                @endif
+                                        @if ($role !== 'admin')
+                                            <button type="submit"
+                                                    class="w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-purple-500/20 text-purple-100 border border-purple-400/50 hover:bg-purple-500/30 transition font-semibold">
+                                                Jadikan Admin
+                                            </button>
+                                        @else
+                                            <button type="submit"
+                                                    class="w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-yellow-500/20 text-yellow-100 border border-yellow-400/50 hover:bg-yellow-500/30 transition font-semibold">
+                                                Turunkan ke Pengguna Biasa
+                                            </button>
+                                        @endif
+                                    </form>
+
+                                    {{-- Form Ubah Status --}}
+                                    <form action="{{ route('admin.users.updateStatus', $u->id) }}" method="POST"
+                                          onsubmit="return confirm('Apakah Anda yakin ingin mengubah status pengguna ini?');">
+                                        @csrf
+                                        @method('PATCH')
+
+                                        @if ($status === 'active')
+                                            <button type="submit"
+                                                    class="w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-red-500/20 text-red-100 border border-red-400/50 hover:bg-red-500/30 transition font-semibold">
+                                                Nonaktifkan Akun
+                                            </button>
+                                        @else
+                                            <button type="submit"
+                                                    class="w-full inline-flex items-center justify-center px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-100 border border-emerald-400/50 hover:bg-emerald-500/30 transition font-semibold">
+                                                Aktifkan Akun
+                                            </button>
+                                        @endif
+                                    </form>
+
+                                </div>
+
+                                <p class="text-[10px] text-green-100/50 mt-3 text-center">
+                                    Perubahan akan langsung diterapkan pada akun pengguna.
+                                </p>
                             </div>
-
-                            <p class="text-[11px] text-green-100/60 mt-3">
-                                Tombol di atas masih dummy. Nanti bisa dihubungkan ke route POST/PUT untuk update role
-                                dan status user.
-                            </p>
-                        </div>
+                        @endif
 
                     </div>
 

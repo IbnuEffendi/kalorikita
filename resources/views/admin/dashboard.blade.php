@@ -23,7 +23,7 @@
         $user = auth()->user();
         $googleConnected = !empty($user?->google_id);
         
-        // Data ini dikirim dari Route (Real Database), init array kosong sebagai fallback
+        // Data ini dikirim dari Route (Real Database), init array kosong sebagai fallback agar tidak error
         $statsToday = $statsToday ?? [];
         $latestOrders = $latestOrders ?? [];
         $latestUsers  = $latestUsers ?? [];
@@ -95,7 +95,7 @@
                                 <span class="inline-flex items-center rounded-full bg-green-700/80 px-3 py-1 text-[11px] font-semibold text-green-100">• Panel Aktif</span>
                             </div>
 
-                            {{-- [PERBAIKAN] Status Google di Content Utama --}}
+                            {{-- Status Google di Content Utama --}}
                             <div class="flex items-center justify-between bg-green-900/50 rounded-2xl px-4 py-3">
                                 <div>
                                     <p class="text-xs text-green-200/80">Google</p>
@@ -103,7 +103,6 @@
                                         {{ $googleConnected ? 'Terhubung' : 'Belum terhubung' }}
                                     </p>
                                 </div>
-                                {{-- Tombol Hubungkan (Hanya muncul jika belum connect) --}}
                                 @if (!$googleConnected)
                                     <a href="{{ route('google.connect') }}" class="text-[11px] font-semibold text-yellow-300 hover:text-yellow-200 underline cursor-pointer">
                                         Hubungkan
@@ -115,15 +114,27 @@
                         <div class="mt-6"><p class="text-xs text-green-100/70 mb-2">Aksi Cepat Admin</p><div class="flex flex-wrap gap-3"><a href="{{ route('admin.paket.create') }}" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 text-green-900 px-4 py-2 text-xs font-semibold shadow-md hover:bg-yellow-300 transition">+ Buat Paket Baru</a><a href="{{ route('admin.orders.index') }}" class="inline-flex items-center gap-2 rounded-full bg-white text-green-900 px-4 py-2 text-xs font-semibold shadow-md hover:bg-green-50 transition">Lihat Semua Pesanan</a><a href="{{ route('admin.reports.index') }}" class="inline-flex items-center gap-2 rounded-full bg-green-700/80 text-green-50 px-4 py-2 text-xs font-semibold hover:bg-green-600 transition">Lihat Laporan Harian</a></div></div>
                     </div>
 
-                    {{-- Card Statistik --}}
+                    {{-- Card Statistik (SUDAH TERHUBUNG DB) --}}
                     <div class="w-full lg:w-80 flex flex-col gap-4">
                         <div class="bg-white rounded-3xl p-5 shadow-xl shadow-black/30 text-green-900">
                             <p class="text-xs font-semibold uppercase tracking-wide text-green-700 mb-1">Statistik Hari Ini</p>
                             <div class="space-y-3 mt-2 text-sm">
-                                <div class="flex items-center justify-between"><span class="text-green-700">Pesanan Masuk</span><span class="font-extrabold">{{ $statsToday['orders_today'] ?? 0 }}</span></div>
-                                <div class="flex items-center justify-between"><span class="text-green-700">Pendapatan</span><span class="font-extrabold">Rp {{ number_format($statsToday['revenue_today'] ?? 0, 0, ',', '.') }}</span></div>
-                                <div class="flex items-center justify-between"><span class="text-green-700">Pengguna Baru</span><span class="font-extrabold">{{ $statsToday['new_users_today'] ?? 0 }}</span></div>
-                                <div class="flex items-center justify-between"><span class="text-green-700">Paket Aktif</span><span class="font-extrabold">{{ $statsToday['active_plans'] ?? 0 }}</span></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-green-700">Pesanan Masuk</span>
+                                    <span class="font-extrabold">{{ $statsToday['orders_today'] ?? 0 }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-green-700">Pendapatan</span>
+                                    <span class="font-extrabold">Rp {{ number_format($statsToday['revenue_today'] ?? 0, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-green-700">Pengguna Baru</span>
+                                    <span class="font-extrabold">{{ $statsToday['new_users_today'] ?? 0 }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-green-700">Paket Aktif</span>
+                                    <span class="font-extrabold">{{ $statsToday['active_plans'] ?? 0 }}</span>
+                                </div>
                             </div>
                             <a href="{{ route('admin.reports.index') }}" class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-full bg-green-800 text-yellow-200 text-xs font-semibold hover:bg-green-700 transition">Lihat laporan detail</a>
                         </div>
@@ -178,4 +189,4 @@
         </div>
     </div>
 </body>
-</html>
+</html> 

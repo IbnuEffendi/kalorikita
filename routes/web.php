@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Storage; // Untuk hapus foto lama
 use Illuminate\Support\Str;             // Untuk cek URL foto
+use Illuminate\Support\Facades\DB;      // [BARU] Untuk query database manual (Grafik/Best Seller)
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
@@ -22,7 +23,7 @@ use App\Http\Controllers\MenuScheduleController;
 use App\Models\PaketCategory;
 use App\Models\Menu;
 use App\Models\MenuSchedule;
-use App\Models\Order; // [WAJIB] Agar Admin bisa ambil data pesanan
+use App\Models\Order; 
 
 /*
 |--------------------------------------------------------------------------
@@ -101,8 +102,13 @@ Route::get('/profil', [ProfilDashboardController::class, 'index'])
     ->middleware('auth');
 
 Route::get('/myorder', function () {
-    return view('profil.myorder');
-})->name('profil.myorder');
+    $orders = Order::where('user_id', auth()->id())
+                ->with(['paketCategory', 'paketOption']) 
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+    return view('profil.myorder', compact('orders'));
+})->name('profil.myorder')->middleware('auth');
 
 
 /*
@@ -155,7 +161,6 @@ Route::get('/connect/google', [GoogleController::class, 'connect'])->middleware(
 | MIDTRANS CALLBACK (WEBHOOK)
 |--------------------------------------------------------------------------
 */
-// [PENTING] Route ini harus di luar middleware auth agar Midtrans bisa akses
 Route::post('/midtrans/callback', [OrderController::class, 'callback']);
 
 
@@ -167,7 +172,7 @@ Route::post('/midtrans/callback', [OrderController::class, 'callback']);
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware('auth') // Pastikan hanya yang login bisa akses
+    ->middleware('auth') 
     ->group(function () {
 
         // ==========================================================
@@ -203,7 +208,6 @@ Route::prefix('admin')
 
             // 3. Ambil 5 User Terbaru
             $latestUsers = User::latest()->take(5)->get()->map(function($u) {
-                // Cari paket aktif user ini
                 $activeOrder = Order::where('user_id', $u->id)
                                 ->where('status', 'aktif')
                                 ->where('end_date', '>=', now())
@@ -236,7 +240,6 @@ Route::prefix('admin')
         Route::get('/paket/create', fn() => view('admin.paket.create'))->name('paket.create');
         Route::post('/paket/store', [PaketController::class, 'store'])->name('paket.store');
         
-        // Halaman Detail
         Route::get('/paket/{id}', function ($id) {
             $package = PaketCategory::findOrFail($id);
             $menus = Menu::all();
@@ -244,17 +247,14 @@ Route::prefix('admin')
             return view('admin.paket.show', compact('package', 'menus', 'schedules'));
         })->name('paket.show');
 
-        // Halaman Edit
         Route::get('/paket/{id}/edit', function($id) {
             $package = PaketCategory::findOrFail($id);
             return view('admin.paket.edit', compact('package'));
         })->name('paket.edit');
         
-        // Update & Hapus
         Route::put('/paket/{id}', [PaketController::class, 'update'])->name('paket.update');
         Route::delete('/paket/{id}', [PaketController::class, 'destroy'])->name('paket.destroy');
 
-        // CRUD Opsi Durasi (Anak)
         Route::post('/paket-options/store', [PaketController::class, 'storeOption'])->name('paket.options.store');
         Route::delete('/paket-options/{id}', [PaketController::class, 'destroyOption'])->name('paket.options.destroy');
 
@@ -314,29 +314,22 @@ Route::prefix('admin')
             return view('admin.paket.schedules', compact('packets', 'menus', 'schedules'));
         })->name('paket.schedules');
 
-        // Simpan
         Route::post('/jadwal-menu/store', [MenuScheduleController::class, 'store'])->name('paket.schedules.store');
-        
-        // [FITUR EDIT JADWAL - HALAMAN TERPISAH]
         Route::get('/jadwal-menu/{id}/edit', [MenuScheduleController::class, 'edit'])->name('paket.schedules.edit');
         Route::put('/jadwal-menu/{id}', [MenuScheduleController::class, 'update'])->name('paket.schedules.update');
-        
-        // Hapus
         Route::delete('/jadwal-menu/{id}', [MenuScheduleController::class, 'destroy'])->name('paket.schedules.destroy');
 
 
         // ==========================================================
-        // 5. FITUR ADMIN LAINNYA (ORDERS, USERS, REPORTS)
+        // 5. FITUR ADMIN LAINNYA
         // ==========================================================
 
-        // --- KELOLA PESANAN (DATA REAL) ---
+        // --- KELOLA PESANAN ---
         Route::get('/orders', function () {
-            // Ambil data DB
             $rawOrders = Order::with(['user', 'paketCategory', 'paketOption'])
                         ->orderBy('created_at', 'desc')
                         ->get();
 
-            // Transformasi Data agar sesuai dengan view kamu (Array Style)
             $orders = $rawOrders->map(function($order) {
                 return [
                     'id'         => $order->id,
@@ -345,7 +338,7 @@ Route::prefix('admin')
                     'user_email' => $order->user->email ?? '-',
                     'plan_name'  => $order->paketCategory->nama_kategori ?? '-',
                     'total'      => $order->total_harga,
-                    'status'     => $order->status, // 'pending', 'aktif'
+                    'status'     => $order->status,
                     'date'       => $order->created_at->format('Y-m-d H:i'),
                     'total_hari' => $order->total_hari,
                     'periode'    => $order->paketOption->periode ?? '-'
@@ -356,15 +349,48 @@ Route::prefix('admin')
         })->name('orders.index');
 
         Route::get('/orders/{id}', function ($id) {
-            // Placeholder Detail Order
             return view('admin.orders.show', ['order' => [], 'items' => []]);
         })->name('orders.show');
 
 
         // --- DATA PENGGUNA ---
-        Route::get('/users', function () {
-            return view('admin.users.index');
+        Route::get('/users', function (Request $request) {
+            $query = User::query();
+
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'LIKE', '%' . $search . '%')
+                      ->orWhere('email', 'LIKE', '%' . $search . '%');
+                });
+            }
+
+            if ($request->has('role') && $request->role != '') {
+                $query->where('role', $request->role);
+            }
+
+            if ($request->has('status') && $request->status != '') {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->has('sort')) {
+                switch ($request->sort) {
+                    case 'oldest': $query->oldest(); break;
+                    case 'name_asc': $query->orderBy('name', 'asc'); break;
+                    case 'name_desc': $query->orderBy('name', 'desc'); break;
+                    default: $query->latest(); break;
+                }
+            } else {
+                $query->latest(); 
+            }
+
+            $users = $query->paginate(10)->withQueryString();
+            $totalUsers = User::count();
+
+            return view('admin.users.index', compact('users', 'totalUsers'));
+
         })->name('users.index');
+
 
         Route::get('/users/{id}', function ($id) {
             $user = User::findOrFail($id);
@@ -372,14 +398,85 @@ Route::prefix('admin')
             return view('admin.users.show', ['userDetail' => $user, 'stats' => $stats]);
         })->name('users.show');
 
+        Route::patch('/users/{id}/role', function ($id) {
+            $user = User::findOrFail($id);
+            if ($user->id == auth()->id()) return back()->with('error', 'Anda tidak bisa mengubah role akun sendiri!');
+            $user->role = ($user->role === 'admin') ? 'user' : 'admin';
+            $user->save();
+            return back()->with('success', 'Role pengguna berhasil diperbarui!');
+        })->name('users.updateRole');
 
-        // --- LAPORAN ---
+        Route::patch('/users/{id}/status', function ($id) {
+            $user = User::findOrFail($id);
+            if ($user->id == auth()->id()) return back()->with('error', 'Anda tidak bisa menonaktifkan akun sendiri!');
+            $user->status = ($user->status === 'aktif') ? 'nonaktif' : 'aktif';
+            $user->save();
+            return back()->with('success', 'Status pengguna berhasil diperbarui!');
+        })->name('users.updateStatus');
+
+
+        // --- LAPORAN (LOGIC DATA REAL SUDAH AKTIF) ---
         Route::get('/reports', function () {
-            return view('admin.reports.index');
+            
+            // 1. SETUP TANGGAL
+            $currentMonth = now()->month;
+            $currentYear = now()->year;
+
+            // 2. HITUNG PEMASUKAN BULAN INI (Hanya status 'aktif')
+            $pemasukan = Order::where('status', 'aktif')
+                        ->whereMonth('created_at', $currentMonth)
+                        ->whereYear('created_at', $currentYear)
+                        ->sum('total_harga');
+
+            // 3. HITUNG TOTAL PESANAN (Semua status)
+            $totalPesanan = Order::count();
+
+            // 4. HITUNG PENGGUNA BARU BULAN INI
+            $penggunaBaru = User::whereMonth('created_at', $currentMonth)
+                            ->whereYear('created_at', $currentYear)
+                            ->count();
+
+            // 5. CARI PAKET TERLARIS
+            $bestSeller = Order::select('paket_category_id', DB::raw('count(*) as total'))
+                        ->where('status', 'aktif')
+                        ->groupBy('paket_category_id')
+                        ->orderByDesc('total')
+                        ->with('paketCategory') 
+                        ->first();
+            
+            $namaPaketTerlaris = $bestSeller && $bestSeller->paketCategory 
+                                ? $bestSeller->paketCategory->nama_kategori 
+                                : 'Belum ada data';
+
+            // 6. SIAPKAN DATA UNTUK GRAFIK (CHART.JS)
+            $chartLabels = [];
+            $chartIncome = [];
+            $chartOrders = [];
+            
+            $daysInMonth = now()->daysInMonth;
+            
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $date = \Carbon\Carbon::createFromDate($currentYear, $currentMonth, $day)->format('Y-m-d');
+                $chartLabels[] = $day;
+                $chartIncome[] = Order::whereDate('created_at', $date)->where('status', 'aktif')->sum('total_harga');
+                $chartOrders[] = Order::whereDate('created_at', $date)->count();
+            }
+
+            // 7. RINCIAN TRANSAKSI TERAKHIR
+            $transactions = Order::with(['user', 'paketCategory'])
+                            ->whereMonth('created_at', $currentMonth)
+                            ->orderBy('created_at', 'desc')
+                            ->take(10)
+                            ->get();
+
+            return view('admin.reports.index', compact(
+                'pemasukan', 'totalPesanan', 'penggunaBaru', 'namaPaketTerlaris',
+                'chartLabels', 'chartIncome', 'chartOrders', 'transactions'
+            ));
+
         })->name('reports.index');
 
         Route::get('/reports/{date}', function ($date) {
-            // Dummy report data
             $report = ['title' => 'Laporan', 'income' => 0, 'orders' => 0, 'date' => $date];
             return view('admin.reports.show', ['report' => $report, 'orders' => []]);
         })->name('reports.show');
@@ -391,7 +488,6 @@ Route::prefix('admin')
         })->name('ai.logs');
 
         Route::get('/ai/ai-logs/{id}', function ($id) {
-            // Dummy log data
             return view('admin.ai.show', ['log' => []]);
         })->name('ai.logs.show');
     });
