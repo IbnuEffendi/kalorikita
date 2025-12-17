@@ -291,7 +291,7 @@
                 return;
             }
 
-            const token = "{{ $snapToken ?? '' }}";
+            const token = "{{ $snapToken ?? ($order->midtrans_snap_token ?? '') }}";
 
             if (!token) {
                 alert('Snap token kosong. Cek konfigurasi Midtrans di backend.');

@@ -6,8 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\PaketOption;
 use App\Models\MenuSchedule;
-use Midtrans\Config;
-use Midtrans\Snap;
+use App\Services\MidtransService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -30,7 +29,7 @@ class OrderController extends Controller
     }
 
     // 2. PROSES SIMPAN ORDER & MINTA TOKEN MIDTRANS
-    public function store(Request $request)
+    public function store(Request $request, MidtransService $midtransService)
     {
         // A. Validasi Input
         $request->validate([
@@ -76,43 +75,25 @@ class OrderController extends Controller
                 'status'            => 'pending', // Wajib Pending dulu
             ]);
 
-            // ==========================================================
-            // KONFIGURASI MIDTRANS
-            // ==========================================================
-            Config::$serverKey    = config('midtrans.server_key');
-            Config::$isProduction = config('midtrans.is_production');
-            Config::$isSanitized  = true;
-            Config::$is3ds        = true;
-
-            // Parameter Midtrans
-            $params = [
-                'transaction_details' => [
-                    'order_id'     => $orderCode,
-                    'gross_amount' => (int) $order->total_harga,
-                ],
-                'customer_details' => [
-                    'first_name' => $request->nama,
-                    'email'      => auth()->user()->email,
-                    'phone'      => $request->whatsapp,
-                    'billing_address' => [
-                        'address' => $request->alamat
-                    ]
-                ],
-                'item_details' => [
-                    [
-                        'id'       => $paketOption->id,
-                        'price'    => (int) $order->total_harga,
-                        'quantity' => 1,
-                        'name'     => substr('Paket ' . $paketOption->category->nama_kategori, 0, 50),
-                    ]
-                ]
-            ];
-
             // Minta Snap Token
-            $snapToken = Snap::getSnapToken($params);
+            $snapToken = $midtransService->createSnapToken($order, [
+                'first_name' => $request->nama,
+                'email'      => auth()->user()->email,
+                'phone'      => $request->whatsapp,
+                'billing_address' => [
+                    'address' => $request->alamat,
+                ],
+            ], [
+                [
+                    'id'       => $paketOption->id,
+                    'price'    => (int) $order->total_harga,
+                    'quantity' => 1,
+                    'name'     => substr('Paket ' . $paketOption->category->nama_kategori, 0, 50),
+                ],
+            ]);
 
             // Simpan token ke DB (opsional)
-            $order->update(['snap_token' => $snapToken]);
+            $order->update(['midtrans_snap_token' => $snapToken]);
 
             // Kirim data ke View Payment
             // Kita kirim variabel $data agar view tidak error
@@ -127,24 +108,48 @@ class OrderController extends Controller
     }
 
     // 3. MIDTRANS CALLBACK (WEBHOOK)
-    public function callback(Request $request)
+    public function callback(Request $request, MidtransService $midtransService)
     {
-        $serverKey = config('midtrans.server_key');
-        $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+        $payload = $request->all();
 
-        if ($hashed == $request->signature_key) {
-            $order = Order::where('order_code', $request->order_id)->first();
-            
-            if ($order) {
-                if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
-                    $order->update(['status' => 'aktif']); // Ubah jadi AKTIF
-                } elseif ($request->transaction_status == 'expire' || $request->transaction_status == 'cancel') {
-                    $order->update(['status' => 'dibatalkan']);
-                } elseif ($request->transaction_status == 'pending') {
-                    $order->update(['status' => 'pending']);
-                }
-            }
+        if (! $midtransService->verifySignature(
+            $request->order_id,
+            $request->status_code,
+            $request->gross_amount,
+            $request->signature_key
+        )) {
+            Log::warning('Midtrans callback with invalid signature', ['payload' => $payload]);
+
+            return response()->json(['message' => 'Invalid signature'], 403);
         }
+
+        $order = Order::where('order_code', $request->order_id)->first();
+
+        if (! $order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        if ((int) $request->gross_amount !== (int) $order->total_harga) {
+            return response()->json(['message' => 'Amount mismatch'], 422);
+        }
+
+        $mappedStatus = $midtransService->mapTransactionStatus($request->transaction_status, $request->fraud_status);
+        $paidAt = $order->paid_at;
+
+        if ($mappedStatus === 'aktif' && ! $order->paid_at) {
+            $paidAt = now();
+        }
+
+        $order->update([
+            'status'                      => $mappedStatus,
+            'midtrans_transaction_id'     => $request->transaction_id,
+            'midtrans_transaction_status' => $request->transaction_status,
+            'midtrans_payment_type'       => $request->payment_type,
+            'midtrans_fraud_status'       => $request->fraud_status,
+            'paid_at'                     => $paidAt,
+            'raw_callback'                => json_encode($payload),
+        ]);
+
         return response()->json(['status' => 'success']);
     }
 
