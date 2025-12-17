@@ -136,18 +136,35 @@
             {{-- KONTEN UTAMA --}}
             <main class="flex-1 space-y-6">
 
-                {{-- HEADER --}}
+                {{-- HEADER + TOMBOL AKSI --}}
                 <section class="bg-green-800/90 border border-green-700/70 rounded-3xl p-6 shadow-xl">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <h1 class="text-xl sm:text-2xl font-semibold text-white">Paket Katering</h1>
-                            <p class="text-xs text-green-100/70 mt-1">Kelola daftar paket katering untuk pelanggan.</p>
+                            <p class="text-xs text-green-100/70 mt-1">
+                                Kelola daftar paket katering untuk pelanggan.
+                            </p>
                         </div>
 
-                        <a href="{{ route('admin.paket.create') }}"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400 text-green-900 font-semibold text-xs hover:bg-yellow-300">
-                            + Buat Paket Baru
-                        </a>
+                        <div class="flex flex-wrap gap-2 justify-start md:justify-end">
+                            {{-- Tombol Buat Paket Baru --}}
+                            <a href="{{ route('admin.paket.create') }}"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400 text-green-900 font-semibold text-xs hover:bg-yellow-300">
+                                + Buat Paket Baru
+                            </a>
+
+                            {{-- Tombol Kelola Menu (master menu) --}}
+                            <a href="{{ route('admin.menu.index') }}"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 text-green-900 font-semibold text-xs hover:bg-white">
+                                Kelola Menu
+                            </a>
+
+                            {{-- Tombol Kelola Batch / Jadwal --}}
+                            <a href="{{ route('admin.batch.index') }}"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-900 text-yellow-300 font-semibold text-xs hover:bg-green-800">
+                                Kelola Batch
+                            </a>
+                        </div>
                     </div>
                 </section>
 
@@ -204,8 +221,6 @@
                                     class="px-4 py-2 rounded-full text-xs font-semibold bg-red-500/20 text-red-200 border border-red-400/40 hover:bg-red-500/30">
                                     Hapus
                                 </button>
-
-
                             </div>
 
                         </div>
@@ -283,8 +298,6 @@
             if (e.target === deleteModal) closeModal();
         });
     </script>
-
-
 
 </body>
 
