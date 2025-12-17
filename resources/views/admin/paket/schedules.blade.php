@@ -10,12 +10,17 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
+    {{-- 1. LIBRARY TOM SELECT (Untuk Searchable Dropdown) --}}
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
     <style>
         body { font-family: 'Instrument Sans', sans-serif; }
         .scroll-thin::-webkit-scrollbar { height: 6px; width: 6px; }
         .scroll-thin::-webkit-scrollbar-thumb { background-color: rgba(251, 191, 36, 0.5); border-radius: 999px; }
         
-        select {
+        /* Custom Arrow untuk Select Biasa (Paket) */
+        select:not(.tomselected) {
             appearance: none;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
@@ -27,6 +32,51 @@
             filter: invert(1);
             cursor: pointer;
         }
+
+        /* 2. CUSTOM CSS UNTUK TOM SELECT AGAR SESUAI TEMA HIJAU */
+        .ts-control {
+            background-color: rgba(20, 83, 45, 0.4) !important; /* Hijau Transparan */
+            border: 1px solid rgba(22, 163, 74, 0.5) !important;
+            color: white !important;
+            border-radius: 0.75rem !important; /* rounded-xl */
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
+            font-size: 0.75rem !important; /* text-xs */
+        }
+        
+        /* Input teks saat mengetik */
+        .ts-control input {
+            color: white !important;
+        }
+
+        /* Dropdown List Wrapper */
+        .ts-dropdown {
+            background-color: #14532d !important; /* bg-green-900 */
+            border: 1px solid rgba(22, 163, 74, 0.5) !important;
+            color: white !important;
+            border-radius: 0.75rem !important;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        /* Item di dalam dropdown */
+        .ts-dropdown .option {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        /* Hover & Active State */
+        .ts-dropdown .active, 
+        .ts-dropdown .option:hover {
+            background-color: #15803d !important; /* bg-green-700 */
+            color: #facc15 !important; /* text-yellow-400 */
+        }
+
+        /* Menghilangkan panah default Tom Select agar bersih */
+        .ts-control::after { border-color: #fff transparent transparent transparent !important; }
+        
+        /* Placeholder color */
+        .ts-control .item { color: white; }
     </style>
 </head>
 
@@ -131,24 +181,29 @@
                                     <label class="block text-[10px] font-bold text-green-300 uppercase mb-1">Tanggal</label>
                                     <input type="date" name="schedule_date" required class="w-full bg-green-900/40 border border-green-600/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-yellow-400 cursor-pointer">
                                 </div>
+                                
+                                {{-- MENU SIANG (SEARCHABLE) --}}
                                 <div>
                                     <label class="block text-[10px] font-bold text-green-300 uppercase mb-1">Menu Siang</label>
-                                    <select name="lunch_menu_id" required class="w-full bg-green-900/40 border border-green-600/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-yellow-400 cursor-pointer">
-                                        <option value="" class="bg-green-900">-- Pilih Menu --</option>
+                                    <select id="select-lunch" name="lunch_menu_id" required placeholder="Cari Menu Siang..." autocomplete="off">
+                                        <option value="">Cari Menu Siang...</option>
                                         @foreach($menus as $m)
-                                            <option value="{{ $m->id }}" class="bg-green-900">{{ $m->nama_menu }}</option>
+                                            <option value="{{ $m->id }}">{{ $m->nama_menu }}</option>
                                         @endforeach
                                     </select>
                                 </div>
+
+                                {{-- MENU MALAM (SEARCHABLE) --}}
                                 <div>
                                     <label class="block text-[10px] font-bold text-green-300 uppercase mb-1">Menu Malam</label>
-                                    <select name="dinner_menu_id" required class="w-full bg-green-900/40 border border-green-600/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-yellow-400 cursor-pointer">
-                                        <option value="" class="bg-green-900">-- Pilih Menu --</option>
+                                    <select id="select-dinner" name="dinner_menu_id" required placeholder="Cari Menu Malam..." autocomplete="off">
+                                        <option value="">Cari Menu Malam...</option>
                                         @foreach($menus as $m)
-                                            <option value="{{ $m->id }}" class="bg-green-900">{{ $m->nama_menu }}</option>
+                                            <option value="{{ $m->id }}">{{ $m->nama_menu }}</option>
                                         @endforeach
                                     </select>
                                 </div>
+
                                 <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-300 text-green-900 font-bold py-2.5 rounded-xl transition shadow-lg flex justify-center items-center gap-2 mt-2 text-xs">
                                     <i class="bi bi-save"></i> Simpan ke Batch
                                 </button>
@@ -202,13 +257,10 @@
                                             </td>
                                             <td class="px-6 py-4 text-right">
                                                 <div class="flex items-center justify-end gap-2">
-                                                    {{-- Tombol Edit (Halaman) --}}
                                                     <a href="{{ route('admin.paket.schedules.edit', $s->id) }}" 
                                                        class="text-blue-300 hover:text-blue-100 transition p-1" title="Edit">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
-
-                                                    {{-- Tombol Hapus (POPUP CUSTOM) --}}
                                                     <button type="button" 
                                                         onclick="openDeleteModal('{{ route('admin.paket.schedules.destroy', $s->id) }}', '{{ \Carbon\Carbon::parse($s->schedule_date)->translatedFormat('d M Y') }}', '{{ $s->paketCategory->nama_kategori }}')"
                                                         class="text-red-300 hover:text-red-100 transition p-1" title="Hapus">
@@ -238,54 +290,50 @@
         </div>
     </div>
 
-    {{-- MODAL DELETE (Sesuai Desain Gambar) --}}
+    {{-- MODAL DELETE --}}
     <div id="delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
         <div class="bg-[#1a412b] border border-green-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative text-center">
-            
             <h3 class="text-lg font-bold text-white mb-2">Hapus Jadwal?</h3>
-            
             <p class="text-green-200/70 text-xs mb-6 leading-relaxed">
                 Jadwal untuk paket <span id="del-paket" class="font-bold text-yellow-300"></span> 
                 pada tanggal <span id="del-date" class="font-bold text-white"></span> 
                 akan dihapus permanen.
             </p>
-
             <div class="flex items-center justify-center gap-3">
-                {{-- Tombol Batal --}}
-                <button type="button" onclick="closeDeleteModal()" 
-                    class="px-6 py-2 rounded-xl bg-green-800 text-green-100 text-xs font-bold hover:bg-green-700 transition">
-                    Batal
-                </button>
-
-                {{-- Form Delete --}}
+                <button type="button" onclick="closeDeleteModal()" class="px-6 py-2 rounded-xl bg-green-800 text-green-100 text-xs font-bold hover:bg-green-700 transition">Batal</button>
                 <form id="delete-form" method="POST" action="">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" 
-                        class="px-6 py-2 rounded-xl bg-red-600 text-white text-xs font-bold hover:bg-red-500 transition shadow-lg">
-                        Hapus
-                    </button>
+                    @csrf @method('DELETE')
+                    <button type="submit" class="px-6 py-2 rounded-xl bg-red-600 text-white text-xs font-bold hover:bg-red-500 transition shadow-lg">Hapus</button>
                 </form>
             </div>
         </div>
     </div>
 
-    {{-- Script Modal Delete --}}
+    {{-- Script Modal Delete & Tom Select --}}
     <script>
+        // 3. INISIALISASI TOM SELECT UNTUK PENCARIAN
+        document.addEventListener('DOMContentLoaded', function() {
+            var settings = {
+                create: false,
+                sortField: { field: "text", direction: "asc" }
+            };
+            
+            // Aktifkan pada Menu Siang
+            new TomSelect('#select-lunch', settings);
+            
+            // Aktifkan pada Menu Malam
+            new TomSelect('#select-dinner', settings);
+        });
+
         function openDeleteModal(actionUrl, dateStr, paketName) {
             const modal = document.getElementById('delete-modal');
             const form = document.getElementById('delete-form');
             const dateSpan = document.getElementById('del-date');
             const paketSpan = document.getElementById('del-paket');
 
-            // Set Action Form
             form.action = actionUrl;
-            
-            // Set Text Info
             dateSpan.innerText = dateStr;
             paketSpan.innerText = paketName;
-
-            // Show Modal
             modal.classList.remove('hidden');
         }
 
