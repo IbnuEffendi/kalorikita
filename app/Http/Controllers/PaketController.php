@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Order;
 use App\Models\PaketCategory;
 use App\Models\PaketOption;
-use Midtrans\Config;
-use Midtrans\Snap;
-use Illuminate\Support\Str;             // [PENTING] Untuk buat Slug otomatis
+use App\Services\MidtransService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage; // [PENTING] Untuk hapus foto lama
+use Illuminate\Support\Str;             // [PENTING] Untuk buat Slug otomatis
 
 class PaketController extends Controller
 {
@@ -52,7 +54,7 @@ class PaketController extends Controller
     /**
      * STEP 2: Halaman Pembayaran (Midtrans)
      */
-    public function payment(Request $request)
+    public function payment(Request $request, MidtransService $midtransService)
     {
         $request->validate([
             'paket_option_id' => 'required|exists:paket_options,id',
@@ -60,42 +62,65 @@ class PaketController extends Controller
             'whatsapp'        => 'required|string',
             'alamat'          => 'required|string',
             'catatan'         => 'nullable|string',
+            'start_date'      => 'nullable|date|after_or_equal:today',
         ]);
 
         $data = $request->all();
         $paketOption = PaketOption::with('category')->findOrFail($request->paket_option_id);
         $totalBox = $paketOption->durasi_hari * 2;
 
-        // Config Midtrans
-        Config::$serverKey    = config('midtrans.server_key');
-        Config::$isProduction = config('midtrans.is_production');
-        Config::$isSanitized  = true;
-        Config::$is3ds        = true;
+        $startDate = Carbon::parse($request->input('start_date', now()->toDateString()));
+        $endDate   = $startDate->copy()->addDays($paketOption->durasi_hari - 1);
 
-        $orderId = 'KK-' . time() . '-' . $paketOption->id;
+        $order = DB::transaction(function () use ($request, $paketOption, $totalBox, $startDate, $endDate, $midtransService) {
+            $orderCode = $this->generateOrderCode();
 
-        $params = [
-            'transaction_details' => [
-                'order_id'     => $orderId,
-                'gross_amount' => $paketOption->harga,
-            ],
-            'customer_details' => [
+            $order = Order::create([
+                'user_id'           => auth()->id(),
+                'paket_category_id' => $paketOption->category->id,
+                'paket_option_id'   => $paketOption->id,
+                'order_code'        => $orderCode,
+                'total_harga'       => $paketOption->harga,
+                'total_hari'        => $paketOption->durasi_hari,
+                'total_box'         => $totalBox,
+                'start_date'        => $startDate,
+                'end_date'          => $endDate,
+                'status'            => 'pending',
+            ]);
+
+            $snapToken = $midtransService->createSnapToken($order, [
                 'first_name' => $request->nama,
+                'email'      => optional(auth()->user())->email,
                 'phone'      => $request->whatsapp,
-            ],
-            'item_details' => [
+                'billing_address' => [
+                    'address' => $request->alamat,
+                ],
+            ], [
                 [
                     'id'       => $paketOption->id,
-                    'price'    => $paketOption->harga,
+                    'price'    => (int) $paketOption->harga,
                     'quantity' => 1,
                     'name'     => 'Paket ' . $paketOption->category->nama_kategori,
                 ],
-            ],
-        ];
+            ]);
 
-        $snapToken = Snap::getSnapToken($params);
+            $order->update(['midtrans_snap_token' => $snapToken]);
 
-        return view('paket.payment', compact('data', 'paketOption', 'totalBox', 'snapToken'));
+            return $order->fresh();
+        });
+
+        $snapToken = $order->midtrans_snap_token;
+
+        return view('paket.payment', compact('data', 'paketOption', 'totalBox', 'snapToken', 'order'));
+    }
+
+    protected function generateOrderCode(): string
+    {
+        do {
+            $code = 'KK-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(4));
+        } while (Order::where('order_code', $code)->exists());
+
+        return $code;
     }
 
 
