@@ -9,29 +9,29 @@ class Order extends Model
 {
     use HasFactory;
 
-    // [PENTING] Kosongkan guarded agar SEMUA data dari controller diizinkan masuk
+    // Boleh untuk development, tapi untuk production lebih aman pakai $fillable.
     protected $guarded = [];
 
-    // [OPSIONAL TAPI BAGUS] Ubah kolom tanggal jadi format Tanggal Otomatis (Carbon)
-    // Supaya di view nanti bisa langsung $order->start_date->format('d M Y')
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date'   => 'datetime',
+        'start_date'   => 'date',     // cukup date kalau tidak perlu jam
+        'end_date'     => 'date',
+        'paid_at'      => 'datetime', // kalau kamu simpan paid_at
+        'total_box'    => 'integer',  // penting agar tidak float
+        'box_terpakai' => 'integer',  // penting agar tidak float
+        'total_hari'   => 'integer',
+        'total_harga'  => 'integer',
     ];
 
-    // Relasi ke User
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Paket Category (Induk: Weight Loss, Maintain, dll)
     public function paketCategory()
     {
         return $this->belongsTo(PaketCategory::class, 'paket_category_id');
     }
 
-    // Relasi ke Paket Option (Durasi: 7 Hari, 14 Hari, dll)
     public function paketOption()
     {
         return $this->belongsTo(PaketOption::class, 'paket_option_id');

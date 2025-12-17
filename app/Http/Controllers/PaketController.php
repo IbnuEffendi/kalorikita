@@ -9,8 +9,8 @@ use App\Models\PaketOption;
 use App\Services\MidtransService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage; // [PENTING] Untuk hapus foto lama
-use Illuminate\Support\Str;             // [PENTING] Untuk buat Slug otomatis
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PaketController extends Controller
 {
@@ -23,7 +23,7 @@ class PaketController extends Controller
      */
     public function index()
     {
-        $categories = PaketCategory::with('options')->get();
+        $categories = PaketCategory::with('options')->where('is_active', true)->get();
         return view('paket.list', compact('categories'));
     }
 
@@ -32,79 +32,115 @@ class PaketController extends Controller
      */
     public function show($slug)
     {
-        $category = PaketCategory::where('slug', $slug)->with('options')->firstOrFail();
+        $category = PaketCategory::where('slug', $slug)
+            ->with(['options' => function ($q) {
+                $q->where('is_active', true);
+            }])
+            ->firstOrFail();
+
         return view('paket.detail', compact('category'));
     }
 
     /**
-     * STEP 1: Halaman Form Checkout
+     * STEP 1: Halaman Form Checkout (Data & Pengiriman)
+     * Route: GET /checkout?paket_option_id=xx (atau sesuai route kamu)
      */
     public function checkout(Request $request)
     {
         if (!$request->has('paket_option_id')) {
-            return redirect()->route('paket.index');
+            // sesuaikan kalau route list kamu pakai paket.list
+            return redirect()->route('paket.list')->with('error', 'Silakan pilih paket dulu.');
         }
 
         $paketOption = PaketOption::with('category')->findOrFail($request->paket_option_id);
-        $totalBox = $paketOption->durasi_hari * 2;
+
+        // asumsi 2x makan per hari
+        $totalBox = (int) ($paketOption->durasi_hari * 2);
 
         return view('paket.checkout', compact('paketOption', 'totalBox'));
     }
 
     /**
-     * STEP 2: Halaman Pembayaran (Midtrans)
+     * STEP 2: Payment (Buat Order + SnapToken Midtrans)
+     * Route: POST /payment
      */
     public function payment(Request $request, MidtransService $midtransService)
     {
-        $request->validate([
-            'paket_option_id' => 'required|exists:paket_options,id',
-            'nama'            => 'required|string',
-            'whatsapp'        => 'required|string',
-            'alamat'          => 'required|string',
-            'catatan'         => 'nullable|string',
-            'start_date'      => 'nullable|date|after_or_equal:today',
+        // Validasi sesuai kebutuhan bisnis (ini yang kamu butuh)
+        $validated = $request->validate([
+            'paket_option_id'  => 'required|exists:paket_options,id',
+            'nama'             => 'required|string|max:255',
+            'whatsapp'         => 'required|string|max:25',
+            'alamat'           => 'required|string',
+            'catatan'          => 'nullable|string|max:500',
+
+            // Wajib (biar jadwal order jelas)
+            'start_date'       => 'required|date|after_or_equal:today',
+
+            // Wajib (sesuai order model kamu)
+            'food_preference'  => 'required|in:non_vegan,vegan',
         ]);
 
         $data = $request->all();
-        $paketOption = PaketOption::with('category')->findOrFail($request->paket_option_id);
-        $totalBox = $paketOption->durasi_hari * 2;
 
-        $startDate = Carbon::parse($request->input('start_date', now()->toDateString()));
-        $endDate   = $startDate->copy()->addDays($paketOption->durasi_hari - 1);
+        $paketOption = PaketOption::with('category')->findOrFail($validated['paket_option_id']);
+        $totalBox = (int) ($paketOption->durasi_hari * 2);
+
+        $startDate = Carbon::parse($validated['start_date'])->startOfDay();
+        $endDate   = $startDate->copy()->addDays(((int) $paketOption->durasi_hari) - 1)->startOfDay();
 
         $order = DB::transaction(function () use ($request, $paketOption, $totalBox, $startDate, $endDate, $midtransService) {
             $orderCode = $this->generateOrderCode();
 
+            // 1) Buat Order dan simpan data pengiriman (snapshot)
             $order = Order::create([
                 'user_id'           => auth()->id(),
                 'paket_category_id' => $paketOption->category->id,
                 'paket_option_id'   => $paketOption->id,
                 'order_code'        => $orderCode,
-                'total_harga'       => $paketOption->harga,
-                'total_hari'        => $paketOption->durasi_hari,
+
+                'total_harga'       => (int) $paketOption->harga,
+                'total_hari'        => (int) $paketOption->durasi_hari,
                 'total_box'         => $totalBox,
+                'box_terpakai'      => 0,
+
                 'start_date'        => $startDate,
                 'end_date'          => $endDate,
+
+                // ✅ simpan dari form checkout
+                'customer_name'     => $request->nama,
+                'user_phone'        => $request->whatsapp,
+                'address'           => $request->alamat,
+                'notes'             => $request->catatan,
+                'food_preference'   => $request->food_preference,
+
                 'status'            => 'pending',
             ]);
 
-            $snapToken = $midtransService->createSnapToken($order, [
-                'first_name' => $request->nama,
-                'email'      => optional(auth()->user())->email,
-                'phone'      => $request->whatsapp,
-                'billing_address' => [
-                    'address' => $request->alamat,
-                ],
-            ], [
+            // 2) Buat Snap Token Midtrans
+            $snapToken = $midtransService->createSnapToken(
+                $order,
                 [
-                    'id'       => $paketOption->id,
-                    'price'    => (int) $paketOption->harga,
-                    'quantity' => 1,
-                    'name'     => 'Paket ' . $paketOption->category->nama_kategori,
+                    'first_name' => $request->nama,
+                    'email'      => optional(auth()->user())->email,
+                    'phone'      => $request->whatsapp,
+                    'billing_address' => [
+                        'address' => $request->alamat,
+                    ],
                 ],
-            ]);
+                [
+                    [
+                        'id'       => (string) $paketOption->id,
+                        'price'    => (int) $paketOption->harga,
+                        'quantity' => 1,
+                        'name'     => substr('Paket ' . $paketOption->category->nama_kategori, 0, 50),
+                    ],
+                ]
+            );
 
-            $order->update(['midtrans_snap_token' => $snapToken]);
+            $order->update([
+                'midtrans_snap_token' => $snapToken,
+            ]);
 
             return $order->fresh();
         });
@@ -123,7 +159,6 @@ class PaketController extends Controller
         return $code;
     }
 
-
     // =========================================================================
     //                            BAGIAN ADMIN (DASHBOARD)
     // =========================================================================
@@ -133,43 +168,52 @@ class PaketController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'nama_kategori' => 'required|string|max:255',
             'deskripsi'     => 'required|string',
             'harga'         => 'required|numeric',
-            'durasi_hari'   => 'required|integer', 
-            'periode'       => 'required|string',  
-            'keuntungan'    => 'nullable|string',  
-            'gambar'        => 'nullable|image|max:2048'
+            'durasi_hari'   => 'required|integer',
+            'periode'       => 'required|string',
+            'keuntungan'    => 'nullable|string',
+            'gambar'        => 'nullable|image|max:2048',
+            'kalori_range'  => 'nullable|string|max:50',
+            'protein_level' => 'nullable|string|max:50',
+            'tagline'       => 'nullable|string|max:100',
         ]);
 
-        // 2. Upload Gambar
         $path = null;
         if ($request->hasFile('gambar')) {
             $path = $request->file('gambar')->store('paket', 'public');
         }
 
-        // 3. Convert string keuntungan "A, B, C" jadi Array JSON
-        $listKeuntungan = $request->keuntungan ? array_map('trim', explode(',', $request->keuntungan)) : [];
+        $listKeuntungan = $request->keuntungan
+            ? array_map('trim', explode(',', $request->keuntungan))
+            : [];
 
-        // 4. Simpan Kategori Paket
+        // Pakai is_active seperti migration kamu (bukan "status")
         $paket = PaketCategory::create([
-            'nama_kategori' => $request->nama_kategori,
-            'slug'          => Str::slug($request->nama_kategori),
-            'deskripsi'     => $request->deskripsi,
-            'gambar'        => $path,
-            'keuntungan'    => $listKeuntungan, 
-            'status'        => 'active'
+            'nama_kategori'  => $request->nama_kategori,
+            'slug'           => Str::slug($request->nama_kategori),
+            'deskripsi'      => $request->deskripsi,
+            'gambar'         => $path,
+            // kalau kolom ini memang ada di tabel kamu
+            'tagline'        => $request->tagline,
+            'kalori_range'   => $request->kalori_range,
+            'protein_level'  => $request->protein_level,
+            'is_active'      => true,
+
+            // kalau kolom keuntungan kamu belum ada di paket_categories, hapus baris ini
+            'keuntungan'     => $listKeuntungan,
         ]);
 
-        // 5. Simpan Opsi Harga (Default)
         PaketOption::create([
             'paket_category_id' => $paket->id,
             'nama_opsi'         => $request->periode,
-            'durasi_hari'       => $request->durasi_hari,
+            'durasi_hari'       => (int) $request->durasi_hari,
+            // kalau kolom periode ada di paket_options kamu, boleh simpan
             'periode'           => $request->periode,
-            'harga'             => $request->harga,
+            'harga'             => (int) $request->harga,
+            'is_active'         => true,
         ]);
 
         return redirect()->route('admin.paket.index')->with('success', 'Paket berhasil dibuat!');
@@ -187,40 +231,47 @@ class PaketController extends Controller
             'deskripsi'     => 'required|string',
             'harga'         => 'required|numeric',
             'keuntungan'    => 'nullable|string',
-            'gambar'        => 'nullable|image|max:2048'
+            'gambar'        => 'nullable|image|max:2048',
+            'kalori_range'  => 'nullable|string|max:50',
+            'protein_level' => 'nullable|string|max:50',
+            'tagline'       => 'nullable|string|max:100',
+            'is_active'     => 'nullable|boolean',
         ]);
 
-        // Update Gambar
         if ($request->hasFile('gambar')) {
-            // Hapus gambar lama jika ada
             if ($paket->gambar && !Str::startsWith($paket->gambar, 'http')) {
                 Storage::disk('public')->delete($paket->gambar);
             }
             $path = $request->file('gambar')->store('paket', 'public');
-            $paket->update(['gambar' => $path]);
+            $paket->gambar = $path;
         }
 
-        // Update Data Paket
-        // Jika input keuntungan kosong, biarkan yang lama. Jika diisi, update.
-        $listKeuntungan = $request->keuntungan 
-                            ? array_map('trim', explode(',', $request->keuntungan)) 
-                            : $paket->keuntungan;
-        
+        $listKeuntungan = $request->keuntungan
+            ? array_map('trim', explode(',', $request->keuntungan))
+            : ($paket->keuntungan ?? []);
+
         $paket->update([
-            'nama_kategori' => $request->nama_kategori,
-            'slug'          => Str::slug($request->nama_kategori), // Update slug juga
-            'deskripsi'     => $request->deskripsi,
-            'keuntungan'    => $listKeuntungan,
-            'status'        => $request->status ?? $paket->status
+            'nama_kategori'  => $request->nama_kategori,
+            'slug'           => Str::slug($request->nama_kategori),
+            'deskripsi'      => $request->deskripsi,
+            'tagline'        => $request->tagline,
+            'kalori_range'   => $request->kalori_range,
+            'protein_level'  => $request->protein_level,
+            'is_active'      => $request->has('is_active') ? (bool) $request->is_active : $paket->is_active,
+
+            // kalau kolom keuntungan kamu belum ada, hapus baris ini
+            'keuntungan'     => $listKeuntungan,
         ]);
 
-        // Update Harga (Opsi Pertama)
+        // Update opsi pertama (simple)
         $opsi = $paket->options()->first();
-        if($opsi) {
+        if ($opsi) {
             $opsi->update([
-                'harga' => $request->harga,
-                'periode' => $request->periode ?? $opsi->periode,
-                'durasi_hari' => $request->durasi_hari ?? $opsi->durasi_hari
+                'harga'       => (int) $request->harga,
+                'nama_opsi'   => $request->periode ?? $opsi->nama_opsi,
+                'durasi_hari' => $request->durasi_hari ?? $opsi->durasi_hari,
+                // kalau kolom periode ada
+                'periode'     => $request->periode ?? ($opsi->periode ?? null),
             ]);
         }
 
@@ -233,52 +284,45 @@ class PaketController extends Controller
     public function destroy($id)
     {
         $paket = PaketCategory::findOrFail($id);
-        
-        // Hapus gambar jika ada
+
         if ($paket->gambar && !Str::startsWith($paket->gambar, 'http')) {
             Storage::disk('public')->delete($paket->gambar);
         }
 
-        $paket->delete(); 
-        
+        $paket->delete();
         return redirect()->route('admin.paket.index')->with('success', 'Paket berhasil dihapus!');
     }
 
     // =========================================================================
-    //                            BAGIAN OPSI HARGA (ANAK)
+    //                            OPSI HARGA (ANAK)
     // =========================================================================
 
-    /**
-     * ADMIN: Tambah Opsi Harga Baru (Misal nambah durasi 14 hari ke paket yg udah ada)
-     */
     public function storeOption(Request $request)
     {
         $request->validate([
             'paket_category_id' => 'required|exists:paket_categories,id',
             'durasi_hari'       => 'required|integer',
-            'periode'           => 'required|string', // Contoh: "2 Minggu"
+            'periode'           => 'required|string|max:50',
             'harga'             => 'required|numeric',
         ]);
 
         PaketOption::create([
             'paket_category_id' => $request->paket_category_id,
-            'nama_opsi'         => $request->periode, // Kita samakan nama opsi dengan periode
-            'durasi_hari'       => $request->durasi_hari,
+            'nama_opsi'         => $request->periode,
+            'durasi_hari'       => (int) $request->durasi_hari,
+            // kalau kolom periode ada
             'periode'           => $request->periode,
-            'harga'             => $request->harga,
+            'harga'             => (int) $request->harga,
+            'is_active'         => true,
         ]);
 
         return redirect()->back()->with('success', 'Varian harga berhasil ditambahkan!');
     }
 
-    /**
-     * ADMIN: Hapus Opsi Harga
-     */
     public function destroyOption($id)
     {
         $option = PaketOption::findOrFail($id);
-        
-        // Cek: Jangan biarkan hapus kalau ini satu-satunya opsi (nanti paketnya jadi error)
+
         $count = PaketOption::where('paket_category_id', $option->paket_category_id)->count();
         if ($count <= 1) {
             return redirect()->back()->with('error', 'Minimal harus menyisakan 1 opsi harga!');

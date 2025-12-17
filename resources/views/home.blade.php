@@ -27,7 +27,6 @@
         <x-display-lab></x-display-lab>
         <x-weekly-menu :menu-mingguan="$menuMingguan" />
         <x-display-membership :packets="$packets" />
-        <x-review></x-review>
     </main>
     <x-footer></x-footer>
     <!-- Swiper JS -->

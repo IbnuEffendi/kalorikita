@@ -21,7 +21,7 @@ class OrderController extends Controller
 
         // Ambil data paket yang dipilih
         $paketOption = PaketOption::with('category')->findOrFail($request->paket_option_id);
-        
+
         // Hitung box (asumsi 2x makan per hari)
         $totalBox = $paketOption->durasi_hari * 2;
 
@@ -50,7 +50,7 @@ class OrderController extends Controller
             $startDate = Carbon::parse($request->start_date);
             $endDate   = $startDate->copy()->addDays($paketOption->durasi_hari - 1);
             $totalBox  = $paketOption->durasi_hari * 2;
-            
+
             // Generate Kode Unik
             $orderCode = 'ORD-' . now()->format('YmdHis') . '-' . rand(100, 999);
 
@@ -59,6 +59,7 @@ class OrderController extends Controller
             // ==========================================================
             $order = Order::create([
                 'user_id'           => auth()->id(),
+                'customer_name' => $request->nama,
                 'paket_category_id' => $paketOption->category->id,
                 'paket_option_id'   => $paketOption->id,
                 'order_code'        => $orderCode,
@@ -98,9 +99,8 @@ class OrderController extends Controller
             // Kirim data ke View Payment
             // Kita kirim variabel $data agar view tidak error
             $data = $request->all();
-            
-            return view('paket.payment', compact('order', 'snapToken', 'paketOption', 'data', 'totalBox'));
 
+            return view('paket.payment', compact('order', 'snapToken', 'paketOption', 'data', 'totalBox'));
         } catch (\Exception $e) {
             Log::error('Order Error: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -129,9 +129,14 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        if ((int) $request->gross_amount !== (int) $order->total_harga) {
+        $gross = (int) round((float) $request->gross_amount);
+        $expected = (int) $order->total_harga;
+
+        if ($gross !== $expected) {
+            Log::warning('Amount mismatch', ['gross' => $gross, 'expected' => $expected]);
             return response()->json(['message' => 'Amount mismatch'], 422);
         }
+
 
         $mappedStatus = $midtransService->mapTransactionStatus($request->transaction_status, $request->fraud_status);
         $paidAt = $order->paid_at;
@@ -158,16 +163,16 @@ class OrderController extends Controller
     {
         // Cari Pesanan User
         $order = Order::where('order_code', $code)
-                    ->where('user_id', auth()->id()) // Validasi keamanan
-                    ->with(['paketCategory', 'paketOption'])
-                    ->firstOrFail();
+            ->where('user_id', auth()->id()) // Validasi keamanan
+            ->with(['paketCategory', 'paketOption'])
+            ->firstOrFail();
 
         // Ambil Jadwal Menu sesuai tanggal pesanan
         $dailyMenus = MenuSchedule::where('paket_category_id', $order->paket_category_id)
-                        ->whereBetween('schedule_date', [$order->start_date, $order->end_date])
-                        ->with(['lunchMenu', 'dinnerMenu'])
-                        ->orderBy('schedule_date', 'asc')
-                        ->get();
+            ->whereBetween('schedule_date', [$order->start_date, $order->end_date])
+            ->with(['lunchMenu', 'dinnerMenu'])
+            ->orderBy('schedule_date', 'asc')
+            ->get();
 
         return view('profil.order-detail', compact('order', 'dailyMenus'));
     }
