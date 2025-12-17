@@ -18,12 +18,13 @@ class MenuScheduleController extends Controller
         $validated = $request->validate([
             'paket_category_id' => 'required|exists:paket_categories,id',
             'schedule_date'     => 'required|date',
-            'lunch_menu_id'     => 'required|exists:menus,id',  // Pastikan nama tabelnya 'menus'
-            'dinner_menu_id'    => 'required|exists:menus,id',
+            
+            // PERBAIKAN: Menggunakan 'menu' (singular) sesuai nama tabel database kamu
+            'lunch_menu_id'     => 'required|exists:menu,id', 
+            'dinner_menu_id'    => 'required|exists:menu,id',
         ]);
 
-        // 2. Cek Duplikat
-        // Kita cek apakah Paket X di Tanggal Y sudah punya jadwal?
+        // 2. Cek Duplikat (Agar tidak ada jadwal ganda untuk paket & tanggal yang sama)
         $exists = MenuSchedule::where('paket_category_id', $request->paket_category_id)
                     ->where('schedule_date', $request->schedule_date)
                     ->exists();
@@ -43,14 +44,12 @@ class MenuScheduleController extends Controller
      */
     public function edit($id)
     {
-        // Ambil data jadwal yang mau diedit
         $schedule = MenuSchedule::findOrFail($id);
         
-        // Ambil data pendukung untuk Dropdown (Pilihan)
+        // Ambil data pendukung untuk Dropdown
         $packets = PaketCategory::all();
         $menus   = Menu::all();
 
-        // Tampilkan view edit khusus
         return view('admin.paket.edit-schedule', compact('schedule', 'packets', 'menus'));
     }
 
@@ -64,14 +63,14 @@ class MenuScheduleController extends Controller
         $validated = $request->validate([
             'paket_category_id' => 'required|exists:paket_categories,id',
             'schedule_date'     => 'required|date',
-            'lunch_menu_id'     => 'required|exists:menus,id',
-            'dinner_menu_id'    => 'required|exists:menus,id',
+            
+            // PERBAIKAN: Menggunakan 'menu' (singular)
+            'lunch_menu_id'     => 'required|exists:menu,id',
+            'dinner_menu_id'    => 'required|exists:menu,id',
         ]);
 
-        // Simpan perubahan
         $schedule->update($validated);
 
-        // Redirect kembali ke halaman Kelola Batch (Tabel Utama)
         return redirect()->route('admin.paket.schedules')->with('success', 'Jadwal berhasil diperbarui!');
     }
 
