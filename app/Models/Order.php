@@ -26,14 +26,17 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
-
     public function paketCategory()
     {
         return $this->belongsTo(PaketCategory::class, 'paket_category_id');
     }
-
     public function paketOption()
     {
         return $this->belongsTo(PaketOption::class, 'paket_option_id');
+    }
+
+    public function deliveryLogs()
+    {
+        return $this->hasMany(\App\Models\OrderDeliveryLog::class);
     }
 }

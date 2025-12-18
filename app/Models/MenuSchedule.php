@@ -12,21 +12,16 @@ class MenuSchedule extends Model
     // Izinkan semua kolom diisi
     protected $guarded = ['id'];
 
-    // Relasi ke Paket (Menu ini milik paket apa?)
-    public function paketCategory()
-    {
-        return $this->belongsTo(PaketCategory::class, 'paket_category_id');
-    }
-
-    // Relasi ke Menu Siang (Ini resep apa?)
     public function lunchMenu()
     {
-        return $this->belongsTo(Menu::class, 'lunch_menu_id');
+        return $this->belongsTo(\App\Models\Menu::class, 'lunch_menu_id');
     }
-
-    // Relasi ke Menu Malam (Ini resep apa?)
     public function dinnerMenu()
     {
-        return $this->belongsTo(Menu::class, 'dinner_menu_id');
+        return $this->belongsTo(\App\Models\Menu::class, 'dinner_menu_id');
+    }
+    public function paketCategory()
+    {
+        return $this->belongsTo(\App\Models\PaketCategory::class, 'paket_category_id');
     }
 }
