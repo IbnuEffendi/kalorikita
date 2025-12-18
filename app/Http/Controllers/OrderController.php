@@ -75,44 +75,35 @@ class OrderController extends Controller
      * USER: Detail langganan + menu (master schedule)
      * + log delivery (kalau kamu sudah bikin tabel log)
      */
-    public function showUserOrder(string $code)
+    public function showUserOrder($code)
     {
-        $order = Order::where('order_code', $code)
+        $order = \App\Models\Order::where('order_code', $code)
             ->where('user_id', auth()->id())
             ->with(['paketCategory', 'paketOption'])
             ->firstOrFail();
 
-        // Ambil menu schedule (menu master) untuk range tanggal langganan
-        $dailyMenus = collect();
+        // Menu schedules sesuai paket + range order
+        $dailyMenus = \App\Models\MenuSchedule::with(['lunchMenu', 'dinnerMenu'])
+            ->where('paket_category_id', $order->paket_category_id)
+            ->whereBetween('schedule_date', [
+                $order->start_date->toDateString(),
+                $order->end_date->toDateString(),
+            ])
+            ->orderBy('schedule_date', 'asc')
+            ->get();
 
-        if ($order->start_date && $order->end_date) {
-            $dailyMenus = MenuSchedule::where('paket_category_id', $order->paket_category_id)
-                ->whereBetween('schedule_date', [$order->start_date, $order->end_date])
-                ->with(['lunchMenu', 'dinnerMenu'])
-                ->orderBy('schedule_date', 'asc')
-                ->get();
-        }
-
-        // OPTIONAL: jika sudah ada tabel log delivery
+        // Delivery logs (kalau sudah ada table)
         $deliveryLogs = collect();
-        if (class_exists(OrderDeliveryLog::class)) {
-            $deliveryLogs = OrderDeliveryLog::with(['lunchMenu', 'dinnerMenu'])
+        try {
+            $deliveryLogs = \Illuminate\Support\Facades\DB::table('order_delivery_logs')
                 ->where('order_id', $order->id)
                 ->orderBy('delivery_date', 'asc')
-                ->get();
+                ->get()
+                ->keyBy('delivery_date'); // supaya cepat ambil per tanggal
+        } catch (\Throwable $e) {
+            $deliveryLogs = collect();
         }
 
-        // Menu hari ini (kalau masih dalam periode)
-        $todayMenu = null;
-        $today = now()->startOfDay();
-
-        if ($order->start_date && $order->end_date && $today->between($order->start_date, $order->end_date)) {
-            $todayMenu = MenuSchedule::with(['lunchMenu', 'dinnerMenu'])
-                ->where('paket_category_id', $order->paket_category_id)
-                ->whereDate('schedule_date', $today)
-                ->first();
-        }
-
-        return view('profil.order-detail', compact('order', 'dailyMenus', 'deliveryLogs', 'todayMenu'));
+        return view('profil.order-detail', compact('order', 'dailyMenus', 'deliveryLogs'));
     }
 }

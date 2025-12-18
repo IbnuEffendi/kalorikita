@@ -19,6 +19,8 @@ use App\Http\Controllers\MenuScheduleController;
 use App\Http\Controllers\PaketController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\AiLogController;
+use App\Http\Controllers\ProfilOrderController;
 
 // --- MODELS ---
 use App\Models\User;
@@ -87,14 +89,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profil', [ProfilDashboardController::class, 'index'])->name('profil.dashboard');
 
-    Route::get('/myorder', function () {
-        $orders = Order::where('user_id', auth()->id())
-            ->with(['paketCategory', 'paketOption'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return view('profil.myorder', compact('orders'));
-    })->name('profil.myorder');
+    Route::get('/myorder', [ProfilOrderController::class, 'index'])
+    ->name('profil.myorder')
+    ->middleware('auth');
 
     Route::get('/myorder/{code}', [OrderController::class, 'showUserOrder'])
         ->name('profil.order.show');
@@ -455,8 +452,8 @@ Route::prefix('admin')
         // =========================
         // AI LOGS
         // =========================
-        Route::get('/ai/ai-logs', fn() => view('admin.ai.logs', ['logs' => []]))->name('ai.logs');
-        Route::get('/ai/ai-logs/{id}', fn($id) => view('admin.ai.show', ['log' => []]))->name('ai.logs.show');
+        Route::get('/ai/ai-logs', [AiLogController::class, 'index'])->name('ai.logs');
+        Route::get('/ai/ai-logs/{id}', [AiLogController::class, 'show'])->name('ai.logs.show');
 
 
         // =========================

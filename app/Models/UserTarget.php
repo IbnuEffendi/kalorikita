@@ -17,4 +17,9 @@ class UserTarget extends Model
         'goal',
         'insight',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
 }

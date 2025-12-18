@@ -19,6 +19,48 @@ class KaloriTrackerController extends Controller
         $user = Auth::user();
 
         // =========================
+        // 0. PREFILL (dari tombol menu -> tracker)
+        // =========================
+        $prefillEntry = null;
+
+        if ($request->boolean('open_entry')) {
+            // eaten_at bisa dikirim format "Y-m-d\TH:i"
+            $eatenAtRaw = $request->query('eaten_at');
+
+            // fallback: kalau cuma ada date, set jam default
+            if (!$eatenAtRaw && $request->query('date')) {
+                $eatenAtRaw = $request->query('date') . 'T12:00';
+            }
+
+            $prefillEntry = [
+                'eaten_at' => $eatenAtRaw ?: now()->format('Y-m-d\TH:i'),
+                'meal'     => (string) $request->query('meal', ''),
+                'category' => (string) $request->query('category', ''),
+                'calories' => $request->query('calories', ''),
+                'carbs'    => $request->query('carbs', ''),
+                'protein'  => $request->query('protein', ''),
+                'fat'      => $request->query('fat', ''),
+                'source'   => 'menu',
+            ];
+
+            /**
+             * Kalau user datang dari tombol "Tambah ke tracker" untuk tanggal tertentu,
+             * kita paksa range jadi date biar ringkasan & tabel sesuai hari itu.
+             */
+            try {
+                $prefillCarbon = \Carbon\Carbon::parse($prefillEntry['eaten_at']);
+                if (!$request->has('range')) {
+                    $request->merge([
+                        'range' => 'date',
+                        'date'  => $prefillCarbon->toDateString(),
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                // kalau format eaten_at kacau, biarkan saja
+            }
+        }
+
+        // =========================
         // 1. RANGE & TANGGAL
         // =========================
         $range     = $request->query('range', 'today');  // today, yesterday, 7d, 30d, date
@@ -34,13 +76,13 @@ class KaloriTrackerController extends Controller
                 break;
 
             case '7d':
-                $start = (clone $today)->subDays(6)->startOfDay();   // termasuk hari ini
+                $start = (clone $today)->subDays(6)->startOfDay();
                 $end   = (clone $today)->endOfDay();
                 $periodLabel = '7 hari terakhir';
                 break;
 
             case '30d':
-                $start = (clone $today)->subDays(29)->startOfDay();  // termasuk hari ini
+                $start = (clone $today)->subDays(29)->startOfDay();
                 $end   = (clone $today)->endOfDay();
                 $periodLabel = '30 hari terakhir';
                 break;
@@ -66,23 +108,19 @@ class KaloriTrackerController extends Controller
         // =========================
         // 2. TARGET HARIAN & RANGE
         // =========================
-
-        // target harian (diset dari KaloriLab, di tabel user_targets)
         $target = UserTarget::where('user_id', $user->id)->first();
 
         $targetCaloriesDaily = $target ? (int) round($target->kalori_target ?? 0) : 0;
-        $targetCarbsDaily    = $target ? (int) round($target->karbo_target ?? 0)    : 0;
-        $targetProteinDaily  = $target ? (int) round($target->protein_target ?? 0)  : 0;
-        $targetFatDaily      = $target ? (int) round($target->lemak_target ?? 0)    : 0;
+        $targetCarbsDaily    = $target ? (int) round($target->karbo_target ?? 0) : 0;
+        $targetProteinDaily  = $target ? (int) round($target->protein_target ?? 0) : 0;
+        $targetFatDaily      = $target ? (int) round($target->lemak_target ?? 0) : 0;
 
-        // berapa hari yang dihitung untuk target total
         $daysForTarget = match ($range) {
             '7d'    => 7,
             '30d'   => 30,
-            default => 1,       // today, yesterday, date
+            default => 1,
         };
 
-        // target TOTAL untuk periode (int, sudah dibulatkan)
         $targetCalories = (int) round($targetCaloriesDaily * $daysForTarget);
         $targetCarbs    = (int) round($targetCarbsDaily    * $daysForTarget);
         $targetProtein  = (int) round($targetProteinDaily  * $daysForTarget);
@@ -96,20 +134,17 @@ class KaloriTrackerController extends Controller
             ->orderBy('eaten_at')
             ->get();
 
-        // sum mentah (float)
         $sumCalories = (float) $entries->sum('calories');
         $sumCarbs    = (float) $entries->sum('carbs');
         $sumProtein  = (float) $entries->sum('protein');
         $sumFat      = (float) $entries->sum('fat');
 
-        // versi integer untuk tampilan
         $todayCalories = (int) round($sumCalories);
         $todayCarbs    = (int) round($sumCarbs);
         $todayProtein  = (int) round($sumProtein);
         $todayFat      = (int) round($sumFat);
 
-        // mapping buat table (pakai array biar gampang di Blade)
-        $entriesForView = $entries->map(function ($entry) {
+        $entriesForView = $entries->map(function ($entry) use ($range) {
             return [
                 'date'     => optional($entry->eaten_at)->format('d/m'),
                 'time'     => optional($entry->eaten_at)->format('H:i'),
@@ -124,21 +159,10 @@ class KaloriTrackerController extends Controller
         // =========================
         $remainingCalories = max(0, $targetCalories - $todayCalories);
 
-        $progressPct = $targetCalories > 0
-            ? (int) round(min(100, ($todayCalories / $targetCalories) * 100))
-            : 0;
-
-        $carbProgressPct = $targetCarbs > 0
-            ? (int) round(min(100, ($todayCarbs / $targetCarbs) * 100))
-            : 0;
-
-        $proteinProgressPct = $targetProtein > 0
-            ? (int) round(min(100, ($todayProtein / $targetProtein) * 100))
-            : 0;
-
-        $fatProgressPct = $targetFat > 0
-            ? (int) round(min(100, ($todayFat / $targetFat) * 100))
-            : 0;
+        $progressPct = $targetCalories > 0 ? (int) round(min(100, ($todayCalories / $targetCalories) * 100)) : 0;
+        $carbProgressPct = $targetCarbs > 0 ? (int) round(min(100, ($todayCarbs / $targetCarbs) * 100)) : 0;
+        $proteinProgressPct = $targetProtein > 0 ? (int) round(min(100, ($todayProtein / $targetProtein) * 100)) : 0;
+        $fatProgressPct = $targetFat > 0 ? (int) round(min(100, ($todayFat / $targetFat) * 100)) : 0;
 
         // =========================
         // 5. LAIN-LAIN: GOOGLE & AI
@@ -147,42 +171,26 @@ class KaloriTrackerController extends Controller
         $aiSuggestion = session('ai_entry_suggestion');
 
         // =========================
-        // 5. DATA PERFORMA 7 & 30 HARI
+        // 5b. DATA PERFORMA 7 & 30 HARI
         // =========================
         $now = now();
-
-        // Range 7 hari terakhir (termasuk hari ini)
         $start7  = $now->copy()->subDays(6)->startOfDay();
         $end7    = $now->copy()->endOfDay();
 
-        // Range 30 hari terakhir (termasuk hari ini)
         $start30 = $now->copy()->subDays(29)->startOfDay();
         $end30   = $now->copy()->endOfDay();
 
-        // Ambil entries dalam range
-        $entries7 = CalorieEntry::where('user_id', $user->id)
-            ->whereBetween('eaten_at', [$start7, $end7])
-            ->get();
+        $entries7 = CalorieEntry::where('user_id', $user->id)->whereBetween('eaten_at', [$start7, $end7])->get();
+        $entries30 = CalorieEntry::where('user_id', $user->id)->whereBetween('eaten_at', [$start30, $end30])->get();
 
-        $entries30 = CalorieEntry::where('user_id', $user->id)
-            ->whereBetween('eaten_at', [$start30, $end30])
-            ->get();
+        $group7 = $entries7->groupBy(fn($e) => optional($e->eaten_at)->toDateString());
+        $group30 = $entries30->groupBy(fn($e) => optional($e->eaten_at)->toDateString());
 
-        // Group by tanggal (Y-m-d), lalu isi ke series per hari
-        $group7 = $entries7->groupBy(function ($e) {
-            return optional($e->eaten_at)->toDateString();
-        });
-
-        $group30 = $entries30->groupBy(function ($e) {
-            return optional($e->eaten_at)->toDateString();
-        });
-
-        $chart7Labels    = [];
-        $chart7Calories  = [];
-        $chart30Labels   = [];
+        $chart7Labels = [];
+        $chart7Calories = [];
+        $chart30Labels = [];
         $chart30Calories = [];
 
-        // 7 hari terakhir
         $period7 = new \Carbon\CarbonPeriod($start7, '1 day', $end7);
         foreach ($period7 as $date) {
             $key = $date->toDateString();
@@ -191,7 +199,6 @@ class KaloriTrackerController extends Controller
             $chart7Calories[] = (int) round($total);
         }
 
-        // 30 hari terakhir
         $period30 = new \Carbon\CarbonPeriod($start30, '1 day', $end30);
         foreach ($period30 as $date) {
             $key = $date->toDateString();
@@ -200,53 +207,53 @@ class KaloriTrackerController extends Controller
             $chart30Calories[] = (int) round($total);
         }
 
-
         // =========================
         // 6. KIRIM KE VIEW
         // =========================
         return view('profil.kalori-tracker', [
-            'user'            => $user,
-            'googleConnected' => $googleConnected,
+            'user'              => $user,
+            'googleConnected'   => $googleConnected,
 
-            'periodLabel'     => $periodLabel,
-            'range'           => $range,
-            'dateParam'       => $dateParam,
-            'daysForTarget'   => $daysForTarget,
+            'periodLabel'       => $periodLabel,
+            'range'             => $range,
+            'dateParam'         => $dateParam,
+            'daysForTarget'     => $daysForTarget,
 
-            // target harian (dipakai untuk "Target Kalori Harian")
             'targetCaloriesDaily' => $targetCaloriesDaily,
             'targetCarbsDaily'    => $targetCarbsDaily,
             'targetProteinDaily'  => $targetProteinDaily,
             'targetFatDaily'      => $targetFatDaily,
 
-            // target total periode (dipakai untuk progress bar)
-            'targetCalories'  => $targetCalories,
-            'targetCarbs'     => $targetCarbs,
-            'targetProtein'   => $targetProtein,
-            'targetFat'       => $targetFat,
+            'targetCalories'    => $targetCalories,
+            'targetCarbs'       => $targetCarbs,
+            'targetProtein'     => $targetProtein,
+            'targetFat'         => $targetFat,
 
-            // realisasi di periode ini (sudah dibulatkan)
-            'todayCalories'   => $todayCalories,
-            'todayCarbs'      => $todayCarbs,
-            'todayProtein'    => $todayProtein,
-            'todayFat'        => $todayFat,
+            'todayCalories'     => $todayCalories,
+            'todayCarbs'        => $todayCarbs,
+            'todayProtein'      => $todayProtein,
+            'todayFat'          => $todayFat,
 
-            'entries'         => $entriesForView,
+            'entries'           => $entriesForView,
 
-            'remainingCalories' => $remainingCalories,
-            'progressPct'       => $progressPct,
-            'carbProgressPct'   => $carbProgressPct,
-            'proteinProgressPct' => $proteinProgressPct,
-            'fatProgressPct'    => $fatProgressPct,
+            'remainingCalories'   => $remainingCalories,
+            'progressPct'         => $progressPct,
+            'carbProgressPct'     => $carbProgressPct,
+            'proteinProgressPct'  => $proteinProgressPct,
+            'fatProgressPct'      => $fatProgressPct,
 
-            'aiSuggestion'   => $aiSuggestion,
-            // data grafik performa
+            'aiSuggestion'      => $aiSuggestion,
+
             'chart7Labels'      => $chart7Labels,
             'chart7Calories'    => $chart7Calories,
             'chart30Labels'     => $chart30Labels,
             'chart30Calories'   => $chart30Calories,
+
+            // ✅ tambahan untuk auto-open modal manual
+            'prefillEntry'      => $prefillEntry,
         ]);
     }
+
 
 
 

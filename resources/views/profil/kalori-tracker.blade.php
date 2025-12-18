@@ -595,24 +595,20 @@
                     <div>
                         <label class="block mb-1 text-green-100/80">Waktu Makan</label>
                         <input type="datetime-local" name="eaten_at"
-                            value="{{ old('eaten_at', $aiSuggestion['eaten_at'] ?? now()->format('Y-m-d\TH:i')) }}"
-                            class="w-full rounded-xl px-3 py-2 text-green-900 text-xs"
-                            placeholder="Contoh: waktu saat kamu makan">
+                            value="{{ old('eaten_at', $prefillEntry['eaten_at'] ?? ($aiSuggestion['eaten_at'] ?? now()->format('Y-m-d\TH:i'))) }}"
+                            class="w-full rounded-xl px-3 py-2 text-green-900 text-xs">
                     </div>
 
                     <div>
                         <label class="block mb-1 text-green-100/80">Nama Makanan / Minuman</label>
                         <input type="text" name="meal"
-                            class="w-full rounded-xl px-3 py-2 text-green-900 text-sm"
-                            placeholder="Contoh: Nasi putih 200g + 2 telur dadar"
-                            value="{{ old('meal', $aiSuggestion['meal'] ?? '') }}" required>
+                            value="{{ old('meal', $prefillEntry['meal'] ?? ($aiSuggestion['meal'] ?? '')) }}"
+                            class="w-full rounded-xl px-3 py-2 text-green-900 text-sm" required>
                     </div>
 
                     <div>
                         <label class="block mb-1 text-green-100/80">Kategori</label>
-                        @php
-                            $selectedCategory = old('category', $aiSuggestion['category'] ?? '');
-                        @endphp
+                        @php $selectedCategory = old('category', $prefillEntry['category'] ?? ($aiSuggestion['category'] ?? '')); @endphp
                         <select name="category" class="w-full rounded-xl px-3 py-2 text-green-900 text-sm">
                             <option value="">Pilih kategori...</option>
                             @foreach (['Sarapan', 'Makan Siang', 'Makan Malam', 'Snack'] as $cat)
@@ -631,26 +627,22 @@
                         <div>
                             <label class="block mb-1 text-green-100/80">Kalori (kkal)</label>
                             <input type="number" name="calories"
-                                class="w-full rounded-xl px-3 py-2 text-green-900 text-sm" placeholder="Contoh: 550"
-                                value="{{ old('calories', $aiSuggestion['calories'] ?? '') }}">
+                                value="{{ old('calories', $prefillEntry['calories'] ?? ($aiSuggestion['calories'] ?? '')) }}">
                         </div>
                         <div>
                             <label class="block mb-1 text-green-100/80">Karbo (g)</label>
                             <input type="number" name="carbs"
-                                class="w-full rounded-xl px-3 py-2 text-green-900 text-sm" placeholder="Contoh: 70"
-                                value="{{ old('carbs', $aiSuggestion['carbs'] ?? '') }}">
+                                value="{{ old('carbs', $prefillEntry['carbs'] ?? ($aiSuggestion['carbs'] ?? '')) }}">
                         </div>
                         <div>
                             <label class="block mb-1 text-green-100/80">Protein (g)</label>
                             <input type="number" name="protein"
-                                class="w-full rounded-xl px-3 py-2 text-green-900 text-sm" placeholder="Contoh: 20"
-                                value="{{ old('protein', $aiSuggestion['protein'] ?? '') }}">
+                                value="{{ old('protein', $prefillEntry['protein'] ?? ($aiSuggestion['protein'] ?? '')) }}">
                         </div>
                         <div>
                             <label class="block mb-1 text-green-100/80">Lemak (g)</label>
                             <input type="number" name="fat"
-                                class="w-full rounded-xl px-3 py-2 text-green-900 text-sm" placeholder="Contoh: 15"
-                                value="{{ old('fat', $aiSuggestion['fat'] ?? '') }}">
+                                value="{{ old('fat', $prefillEntry['fat'] ?? ($aiSuggestion['fat'] ?? '')) }}">
                         </div>
                     </div>
 
@@ -1018,15 +1010,16 @@ Sarapan tadi: nasi putih 1 piring (±200 g), ayam goreng 1 potong paha, sambal s
         }
 
         // DEFAULT MODE
-        @if (!empty($aiSuggestion))
-            // Kalau baru saja datang dari analisis AI:
-            // buka modal dan tampilkan mode manual dengan data terisi
+        @if (!empty($prefillEntry))
+            setMode('manual');
+            entryModal.classList.remove('hidden');
+        @elseif (!empty($aiSuggestion))
             setMode('manual');
             entryModal.classList.remove('hidden');
         @else
-            // Kalau user baru klik "Tambah Catatan", arahkan dulu ke Input via AI
             setMode('ai');
         @endif
+
 
 
 

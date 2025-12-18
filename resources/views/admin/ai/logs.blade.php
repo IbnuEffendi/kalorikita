@@ -173,52 +173,61 @@
                 <section class="bg-green-800/90 border border-green-700/60 rounded-3xl p-6 shadow-xl text-xs">
                     <h2 class="text-sm font-semibold text-white mb-3">Filter</h2>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                        <div>
-                            <label class="block text-green-100/80 mb-1">Cari Pengguna</label>
-                            <input type="text" placeholder="Nama atau email..."
-                                class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs placeholder:text-green-200/40 focus:outline-none focus:ring-1 focus:ring-yellow-300">
+                    <form method="GET" action="{{ route('admin.ai.logs') }}">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-green-100/80 mb-1">Cari Pengguna</label>
+                                <input type="text" name="q" value="{{ request('q') }}"
+                                    placeholder="Nama atau email..."
+                                    class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs placeholder:text-green-200/40 focus:outline-none focus:ring-1 focus:ring-yellow-300">
+                            </div>
+
+                            <div>
+                                <label class="block text-green-100/80 mb-1">Status</label>
+                                <select name="status"
+                                    class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
+                                    <option value="">Semua</option>
+                                    <option value="success" {{ request('status') == 'success' ? 'selected' : '' }}>
+                                        Berhasil</option>
+                                    <option value="error" {{ request('status') == 'error' ? 'selected' : '' }}>Error
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-green-100/80 mb-1">Goal</label>
+                                <select name="goal"
+                                    class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
+                                    <option value="">Semua</option>
+                                    <option value="weightloss" {{ request('goal') == 'weightloss' ? 'selected' : '' }}>
+                                        Weightloss</option>
+                                    <option value="maintain" {{ request('goal') == 'maintain' ? 'selected' : '' }}>
+                                        Maintain</option>
+                                    <option value="bulking" {{ request('goal') == 'bulking' ? 'selected' : '' }}>Bulking
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-green-100/80 mb-1">Tanggal</label>
+                                <input type="date" name="date" value="{{ request('date') }}"
+                                    class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-green-100/80 mb-1">Status</label>
-                            <select
-                                class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
-                                <option value="">Semua</option>
-                                <option value="success">Berhasil</option>
-                                <option value="error">Error</option>
-                            </select>
+                        <div class="mt-4 flex justify-end gap-2">
+                            <a href="{{ route('admin.ai.logs') }}"
+                                class="px-4 py-2 rounded-full bg-green-900 text-green-100 hover:bg-green-800 transition">
+                                Reset
+                            </a>
+                            <button type="submit"
+                                class="px-4 py-2 rounded-full bg-yellow-400 text-green-900 font-semibold hover:bg-yellow-300 transition">
+                                Terapkan Filter
+                            </button>
                         </div>
-
-                        <div>
-                            <label class="block text-green-100/80 mb-1">Goal</label>
-                            <select
-                                class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
-                                <option value="">Semua</option>
-                                <option value="defisit">Defisit</option>
-                                <option value="maintain">Maintain</option>
-                                <option value="surplus">Surplus</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-green-100/80 mb-1">Rentang Tanggal</label>
-                            <input type="date"
-                                class="w-full rounded-2xl border border-green-600/60 bg-green-900/60 text-green-50 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-yellow-300">
-                        </div>
-                    </div>
-
-                    <div class="mt-4 flex justify-end gap-2">
-                        <button
-                            class="px-4 py-2 rounded-full bg-green-900 text-green-100 hover:bg-green-800 transition">
-                            Reset
-                        </button>
-                        <button
-                            class="px-4 py-2 rounded-full bg-yellow-400 text-green-900 font-semibold hover:bg-yellow-300 transition">
-                            Terapkan Filter
-                        </button>
-                    </div>
+                    </form>
                 </section>
+
 
                 {{-- TABEL LOG --}}
                 <section class="bg-green-800/90 border border-green-700/60 rounded-3xl p-6 shadow-xl">
@@ -358,7 +367,8 @@
 
                                                 @if ($errorMsg)
                                                     <p class="mt-1 text-[10px] text-red-200/80 max-w-xs">
-                                                        {{ Str::limit($errorMsg, 60) }}
+                                                        {{ \Illuminate\Support\Str::limit($errorMsg, 60) }}
+
                                                     </p>
                                                 @endif
                                             </td>
