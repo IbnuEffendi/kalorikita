@@ -41,6 +41,8 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: ""
         run: |
+          cp .env.example .env
+          php artisan key:generate
           php artisan migrate --force
           php artisan test
 
@@ -67,6 +69,8 @@ jobs:
 
             # --- Bagian Backend ---
             composer install --no-dev --optimize-autoloader
+            cp .env.example .env
+            php artisan key:generate
             php artisan migrate --force
 
             # --- Bagian Frontend (Tailwind/Vite) ---
