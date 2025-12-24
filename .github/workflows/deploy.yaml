@@ -1,90 +1,86 @@
-name: Laravel CI-CD
+name: Deploy with Rsync
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
-  # --- JOB 1: TESTING (CI) ---
-  tests:
+  deploy:
     runs-on: ubuntu-latest
-
-    # Service MySQL untuk testing (Sudah Benar)
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: laravel_testing
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
+      # --- TAHAP 1: PERSIAPAN DI GITHUB (Bukan di Server) ---
+      
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
+          php-version: '8.2'
           extensions: mbstring, dom, curl, libxml, mysql
 
-      - name: Install Dependencies
-        run: composer install --prefer-dist --no-interaction
+      - name: Install Backend (Composer)
+        # Kita install --no-dev agar folder vendor siap pakai untuk production
+        run: composer install --no-dev --prefer-dist --optimize-autoloader
 
-      - name: Run Tests
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: laravel_testing
-          DB_USERNAME: root
-          DB_PASSWORD: ""
+      - name: Setup Node.js & Build Frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Build Assets
+        # Kita compile CSS/JS di sini, jadi server tidak perlu NPM/NodeJS
         run: |
-          cp .env.example .env
-          php artisan key:generate
-          php artisan migrate --force
-          php artisan test
+          npm install
+          npm run build
+          # Hapus folder node_modules setelah build biar upload gak berat
+          rm -rf node_modules
 
-  # --- JOB 2: DEPLOY (CD) ---
-  deploy:
-    runs-on: ubuntu-latest
-    needs: tests
-    if: github.ref == 'refs/heads/main'
+      # --- TAHAP 2: PENGIRIMAN FILE (RSYNC) ---
 
-    steps:
-      - name: Deploy via SSH
+      - name: Prepare SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Rsync Deploy
+        # Mengirim file dari GitHub Runner ke Server VPS
+        # --exclude: Jangan menimpa .env atau folder git di server
+        run: |
+          rsync -avz --delete -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa" \
+          --exclude='.env' \
+          --exclude='.git/' \
+          --exclude='.github/' \
+          --exclude='tests/' \
+          ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/kalorikita
+
+      # --- TAHAP 3: FINISHING DI SERVER ---
+
+      - name: Run Remote Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }} # Pakai Private Key
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # Masuk ke folder project
             cd /var/www/kalorikita
             
-            # 1. Tarik kode terbaru
-            git pull origin main
+            # Setup .env jika belum ada (Copy example, tapi jangan timpa kalau sudah ada)
+            if [ ! -f .env ]; then
+                cp .env.example .env
+                # Warning: Anda harus edit .env manual nanti untuk isi DB password!
+            fi
 
-            # 2. Install dependency Backend
-            composer install --no-dev --optimize-autoloader
-            
-            # --- HAPUS PERINTAH BERBAHAYA (cp .env & key:generate) DARI SINI ---
-            
-            # 3. Update Database (Aman)
+            # Update Database & Cache
             php artisan migrate --force
-
-            # 4. Build Frontend (Tailwind/Vite)
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" 
-            npm install
-            npm run build
-
-            # 5. Optimasi & Bersihkan Cache
+            php artisan storage:link
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
             
-            # 6. Pastikan permission storage tetap benar (Opsional tapi disarankan)
-            chmod -R 775 storage bootstrap/cache
+            # Perbaiki Izin Folder
+            sudo chown -R ${{ secrets.SSH_USER }}:www-data .
+            sudo chmod -R 775 storage bootstrap/cache
