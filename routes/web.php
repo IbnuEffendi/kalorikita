@@ -90,8 +90,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil', [ProfilDashboardController::class, 'index'])->name('profil.dashboard');
 
     Route::get('/myorder', [ProfilOrderController::class, 'index'])
-    ->name('profil.myorder')
-    ->middleware('auth');
+        ->name('profil.myorder')
+        ->middleware('auth');
 
     Route::get('/myorder/{code}', [OrderController::class, 'showUserOrder'])
         ->name('profil.order.show');
@@ -465,3 +465,11 @@ Route::prefix('admin')
         Route::post('/delivery/update', [\App\Http\Controllers\Admin\DeliveryController::class, 'update'])
             ->name('delivery.update');
     });
+
+// AI generate preview
+Route::post('/admin/paket/schedules/ai-generate', [\App\Http\Controllers\Admin\PaketScheduleController::class, 'aiGenerate'])
+    ->name('admin.paket.schedules.ai.generate');
+
+// AI confirm save (bulk)
+Route::post('/admin/paket/schedules/ai-confirm', [\App\Http\Controllers\Admin\PaketScheduleController::class, 'aiConfirm'])
+    ->name('admin.paket.schedules.ai.confirm');

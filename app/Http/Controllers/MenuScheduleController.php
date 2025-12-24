@@ -84,4 +84,6 @@ class MenuScheduleController extends Controller
 
         return back()->with('success', 'Jadwal berhasil dihapus!');
     }
+
+    
 }
