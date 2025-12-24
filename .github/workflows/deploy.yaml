@@ -64,7 +64,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /var/www/html/kalorikita
+            cd /var/www/kalorikita
             git pull origin main
 
             # --- Bagian Backend ---
