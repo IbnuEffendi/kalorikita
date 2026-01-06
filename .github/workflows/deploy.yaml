@@ -45,16 +45,34 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Rsync Deploy
-        # Mengirim file dari GitHub Runner ke Server VPS
-        # --exclude: Jangan menimpa .env atau folder git di server
+      - name: Deploy via Git (Pull or Clone)
+        # Login ke server via SSH lalu jalankan perintah logic git
         run: |
-          rsync -avz --delete -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa" \
-          --exclude='.env' \
-          --exclude='.git/' \
-          --exclude='.github/' \
-          --exclude='tests/' \
-          ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/kalorikita
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            # --- KONFIGURASI ---
+            TARGET_DIR="/var/www/kalorikita"
+            REPO_URL="git@github.com:IbnuEffendi/kalorikita.git"
+            BRANCH="main"
+            # -------------------
+
+            # Cek apakah folder .git sudah ada di tujuan
+            if [ -d "$TARGET_DIR/.git" ]; then
+              echo "Repository ditemukan. Melakukan git pull..."
+              cd $TARGET_DIR
+              
+              # Reset permission jika perlu (opsional)
+              # git reset --hard
+              
+              git pull origin $BRANCH
+            else
+              echo "Repository belum ada atau rusak. Melakukan git clone..."
+              
+              # Pastikan folder induk bersih jika folder tujuannya kosong tapi ada
+              # rmdir $TARGET_DIR 2>/dev/null || true
+              
+              git clone $REPO_URL $TARGET_DIR
+            fi
+          EOF
 
       # --- TAHAP 3: FINISHING DI SERVER ---
 
